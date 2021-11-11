@@ -9,4 +9,3 @@ node.d/massbit/massbitroute/*.conf
 http.conf
 nginx.conf
 etc/htpasswd
-http.d/massbit/massbitroute/node/
