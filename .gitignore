@@ -1,0 +1,11 @@
+logs
+conf.d/
+*.log
+cache
+data
+vars/
+http.d/massbit/massbitroute/*.conf
+node.d/massbit/massbitroute/*.conf
+http.conf
+nginx.conf
+etc/htpasswd

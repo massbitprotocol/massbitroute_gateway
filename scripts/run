@@ -11,7 +11,7 @@ _clean_vts() {
 }
 _clean_prom() {
 	h=$1
-	if [ -z "$h" ]; then h="127.0.0.1:9090"; fi
+	if [ -z "$h" ]; then h="127.0.0.1:44449"; fi
 	curl -X POST -g http://${h}'/__internal_prometheus/api/v1/admin/tsdb/delete_series?match[]={__name__=~".+"}'
 	curl -X POST -g http://${h}'/__internal_prometheus/api/v1/admin/tsdb/clean_tombstones'
 }
@@ -27,7 +27,13 @@ _git_config() {
 	# EOF
 }
 _reload() {
-	/massbit/massbitroute/app/src/cmd_server nginx -s reload
+	SITE_ROOT=$1
+	if [ -z "$SITE_ROOT" ]; then
+		SITE_ROOT=$(dirname $(realpath $0))
+		SITE_ROOT=$SITE_ROOT/../
+	fi
+	$SITE_ROOT/bin/openresty/nginx/sbin/nginx -p $SITE_ROOT -c nginx.conf -s reload
+	#	/massbit/massbitroute/app/src/cmd_server nginx -s reload
 	#	/massbit/massbitroute/app/src/cmd_server update
 }
 _remove() {
@@ -42,7 +48,7 @@ _remove() {
 }
 _commit() {
 	conf=$1
-	if [ ! -f "$conf "]; then exit 1; fi
+	if [ ! -f "$conf" ]; then exit 1; fi
 	cd $(dirname $(realpath $0))
 	_git_config
 	git add -f "$conf"
@@ -53,27 +59,31 @@ _commit() {
 _pull() {
 	dir=$1
 	cd $dir
-	tmp=$(mktemp)
-	git pull >$tmp
-	grep -i "updating" $tmp
+	#tmp=$(mktemp)
+	git pull | grep "updating"
+	#>$tmp
+	#grep -i "updating" $tmp
 	if [ $? -eq 0 ]; then
-		grep -i "conf.d" $tmp
+		#		grep -i "conf.d" $tmp
 		_reload
-		if [ $? -ne 0 ]; then
-			/massbit/massbitroute/app/src/cmd_server update
-		fi
+		# if [ $? -ne 0 ]; then
+		# 	/massbit/massbitroute/app/src/cmd_server update
+		# fi
 		#		/massbit/massbitroute/app/src/cmd_server nginx -s reload
 	fi
-	rm $tmp
+	#rm $tmp
 }
 _service_grafana() {
-	_SITE_ROOT_=$1
-	_service_grafana_init
-	exec $GRAFANA_DIR/bin/grafana-server -config $_SITE_ROOT_/etc/grafana/stat.ini -homepath $GRAFANA_DIR
+	SITE_ROOT=$1
+	mkdir -p _SITE_ROOT_/data/grafana
+	GRAFANA_DIR=$SITE_ROOT/bin/grafana/$GRAFANA_VERSION
+	exec $GRAFANA_DIR/bin/grafana-server -config $SITE_ROOT/etc/grafana/stat.ini -homepath $GRAFANA_DIR
 }
 _service_prometheus() {
-	_SITE_ROOT_=$1
-	exec $PROMETHEUS_DIR/bin/prometheus --web.enable-admin-api --config.file=$_SITE_ROOT_/etc/prometheus/stat.yml --web.listen-address="127.0.0.1:9090" --web.external-url http://127.0.0.1:9090/__internal_prometheus --web.enable-lifecycle --storage.tsdb.path $_SITE_ROOT_/data/prometheus
+	SITE_ROOT=$1
+	mkdir -p _SITE_ROOT_/data/prometheus
+	PROMETHEUS_DIR=$SITE_ROOT/bin/prometheus/$PROMETHEUS_VERSION
+	exec $PROMETHEUS_DIR/bin/prometheus --web.enable-admin-api --config.file=$SITE_ROOT/etc/prometheus/stat.yml --web.listen-address="127.0.0.1:44449" --web.external-url http://127.0.0.1:44449/__internal_prometheus --web.enable-lifecycle --storage.tsdb.path $SITE_ROOT/data/prometheus
 }
 loop() {
 	while true; do
@@ -82,4 +92,14 @@ loop() {
 	done
 
 }
+_run() {
+	SITE_ROOT=$1
+	if [ -z "$SITE_ROOT" ]; then
+		SITE_ROOT=$(dirname $(realpath $0))
+		SITE_ROOT=$SITE_ROOT/../
+	fi
+
+	$SITE_ROOT/bin/openresty/nginx/sbin/nginx -p $SITE_ROOT -c nginx.conf
+}
+
 $@

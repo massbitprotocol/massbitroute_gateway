@@ -10,4 +10,4 @@ scrape_configs:
     #     regex: "([^:]+)(:[0-9]+)?"
     #     replacement: "${1}"
     static_configs:
-      - targets: ["z1-0.gw.mbr.massbitroute.com"]
+      - targets: ["localhost"]
