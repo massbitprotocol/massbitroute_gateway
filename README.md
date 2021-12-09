@@ -1,3 +1,3 @@
 # Massbitroute Gateway
 
-Component using for routeing traffic between all backend providers
+Component using for routing traffic between all backend providers
