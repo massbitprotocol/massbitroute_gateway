@@ -10,23 +10,7 @@ local _config = {
     apps = {},
     supervisor = [[
 
-[program:gateway_pull]
-command=/bin/bash _SITE_ROOT_/scripts/run loop _pull _SITE_ROOT_ v1
-autorestart=true
 
-[program:prometheus]
-command=/bin/bash _SITE_ROOT_/scripts/run loop _service_prometheus _SITE_ROOT_
-directory=_SITE_ROOT_/data/prometheus
-redirect_stderr=true
-stdout_logfile=_SITE_ROOT_/logs/prometheus.log
-autorestart=true
-
-[program:grafana]
-command=/bin/bash _SITE_ROOT_/scripts/run loop _service_grafana _SITE_ROOT_
-directory=_SITE_ROOT_/data/grafana
-redirect_stderr=true
-stdout_logfile=_SITE_ROOT_/logs/grafana.log
-autorestart=true
     ]]
 }
 return _config
