@@ -23,19 +23,26 @@ loop() {
 		sleep 10
 	done
 }
+_deprecate() {
+	n=$(ls http.d | wc -l)
+	if [ \( $n -ne 4 \) -a \( $n -ne 2 \) ]; then
+		rm -rf http.d/*
+	fi
+}
 _monitor() {
+	_deprecate
 	is_reload=0
 	id=$(cat $SITE_ROOT/vars/ID)
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	network=$(cat $SITE_ROOT/vars/NETWORK)
-	curl -sSfL $MBR_API/deploy/$type/${id}.conf -o http.d/${id}.conf.new
-	diff http.d/${id}.conf http.d/${id}.conf.new
+	curl -sSfL $MBR_API/deploy/${type}conf/${blockchain}-${network}.conf -o http.d/${type}.conf.new
+	diff http.d/${type}.conf http.d/${type}.conf.new
 	if [ $? -ne 0 ]; then
-		mv http.d/${id}.conf.new http.d/${id}.conf
+		mv http.d/${type}.conf.new http.d/${type}.conf
 		is_reload=1
 	fi
 
-	curl -sSfL $MBR_API/deploy/dapi/${blockchain}-${network}.conf -o http.d/${blockchain}-${network}.conf.new
+	curl -sSfL $MBR_API/deploy/dapiconf/${blockchain}-${network}.conf -o http.d/${blockchain}-${network}.conf.new
 	diff http.d/${blockchain}-${network}.conf http.d/${blockchain}-${network}.conf.new
 	if [ $? -ne 0 ]; then
 		mv http.d/${blockchain}-${network}.conf.new http.d/${blockchain}-${network}.conf
