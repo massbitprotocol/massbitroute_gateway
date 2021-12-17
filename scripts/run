@@ -5,7 +5,7 @@ cd $SITE_ROOT
 source $SITE_ROOT/.env
 git="git -C $SITE_ROOT"
 type="gateway"
-mbr_cli="/massbit/massbitroute/app/src/sites/services/$type/mbr"
+mbr="/massbit/massbitroute/app/src/sites/services/$type/mbr"
 script_run="/massbit/massbitroute/app/src/sites/services/$type/scripts/run"
 cmd="/massbit/massbitroute/app/src/sites/services/$type/cmd_server"
 nginx="$cmd nginx"
@@ -14,7 +14,9 @@ _git_config() {
 	$git config --global user.email "baysao@gmail.com"
 }
 _reload() {
-	$nginx -s reload
+	$cmd _update
+	# $mbr $type register
+	# $nginx -s reload
 }
 
 loop() {
@@ -29,23 +31,33 @@ _deprecate() {
 		rm -rf http.d/*
 	fi
 }
+_update_src() {
+	cd gbc
+	git pull origin master
+	cd $SITE_ROOT
+}
 _monitor() {
-	_deprecate
+	$0 _deprecate
+	$0 _update_src
 	is_reload=0
 	id=$(cat $SITE_ROOT/vars/ID)
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	network=$(cat $SITE_ROOT/vars/NETWORK)
-	curl -sSfL $MBR_API/deploy/${type}conf/${blockchain}-${network}.conf -o http.d/${type}.conf.new
+	blnet=${blockchain}-${network}
+	curl -sSfL $MBR_API/deploy/${type}conf/${blnet}.conf -o http.d/${type}.conf.new
 	diff http.d/${type}.conf http.d/${type}.conf.new
 	if [ $? -ne 0 ]; then
 		mv http.d/${type}.conf.new http.d/${type}.conf
 		is_reload=1
 	fi
 
-	curl -sSfL $MBR_API/deploy/dapiconf/${blockchain}-${network}.conf -o http.d/${blockchain}-${network}.conf.new
-	diff http.d/${blockchain}-${network}.conf http.d/${blockchain}-${network}.conf.new
+	conf=http.d/${blnet}.conf
+	curl -sSfL $MBR_API/deploy/dapiconf/${blnet}.conf -o ${conf}.new
+	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
+	diff ${conf}.orig ${conf}.new
 	if [ $? -ne 0 ]; then
-		mv http.d/${blockchain}-${network}.conf.new http.d/${blockchain}-${network}.conf
+		mv ${conf}.new ${conf}.orig
+		sed "/add_header X-Cached/ a add_header X-Mbr-Gateway-Id $id;" ${conf}.orig >$conf
 		is_reload=1
 	fi
 
@@ -56,7 +68,7 @@ _monitor() {
 	if [ $is_reload -ne 0 ]; then
 		$0 _reload
 	fi
-	$mbr_cli $type ping
+	$mbr $type ping
 }
 
 _run() {
