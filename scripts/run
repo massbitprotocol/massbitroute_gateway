@@ -43,6 +43,7 @@ _update_src() {
 _update_network() {
 	blockchain=$1
 	network=$2
+	id=$3
 	blnet=${blockchain}-${network}
 
 	conf=http.d/gw-${blnet}.conf
@@ -65,6 +66,7 @@ _update_network() {
 	diff -s ${conf}.orig ${conf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		cp ${conf}.new ${conf}.orig
+		sed "s/__GATEWAY_ID__/$id/g" ${conf}.orig >$conf
 		is_reload=1
 	fi
 
@@ -81,8 +83,8 @@ _update_network() {
 	backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/," backup ;");print}' $conf)
 
 	if [ -n "$backup" ]; then
-		n=$(wc -c http.d/gw-${blnet}.conf | cut -d' ' -f1)
-		if [ $n -eq 0 ]; then
+		grep server http.d/gw-${blnet}.conf >/dev/null
+		if [ $? -ne 0 ]; then
 			backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/,";");print}' $conf)
 			cat >http.d/gw-${blnet}.conf <<EOF
 upstream ${blnet}.node.mbr.massbitroute.com {
@@ -91,13 +93,14 @@ EOF
 		fi
 		sed "/upstream/ a $backup" -i http.d/gw-${blnet}.conf
 	fi
+	sed "s/__GATEWAY_ID__/$id/g" etc/gateway.conf >http.d/gateway.conf0
 	return $is_reload
 }
 _monitor() {
 	$cmd _update
 	# $mbr $type register
 	mkdir -p http.d
-	# rm http.d/*
+	rm http.d/*
 	$0 _deprecate
 	$0 _update_src
 	is_reload=0
@@ -117,14 +120,14 @@ _monitor() {
 
 	if [ "$blockchain" = "all" ]; then
 		for blockchain in avax bsc dot eth ftm matic near sol; do
-			_update_network $blockchain $network
+			_update_network $blockchain $network $id
 			if [ $? -eq 1 ]; then
 				is_reload=1
 			fi
 
 		done
 	else
-		_update_network $blockchain $network
+		_update_network $blockchain $network $id
 		if [ $? -eq 1 ]; then
 			is_reload=1
 		fi
