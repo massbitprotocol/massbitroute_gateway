@@ -7,10 +7,8 @@ Component used for routing traffic to backend providers
 
 Currently, we only support Ubuntu 20.04 x64 with a minimum requirement of 4 vCPU and 4G RAM, 40GB free space
 
-## Login to the system and switch to root permission
-```
-sudo su
-```
+All command require `root` permission. 
+
 ### Public IP Address
 
 You must have your own public IP (ipv4) address when registering with the Massbit system. Massbit will forward traffic through this IP.
