@@ -7,7 +7,7 @@ Component used for routing traffic to backend providers
 
 Currently, we only support Ubuntu 20.04 x64 with a minimum requirement of 4 vCPU and 4G RAM, 40GB free space
 
-All command require `root` permission. 
+All commands require `root` permission. 
 
 ### Public IP Address
 
