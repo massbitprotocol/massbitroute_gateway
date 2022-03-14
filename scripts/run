@@ -1,30 +1,18 @@
 #!/bin/bash
-#v3
 SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 export HOME=/tmp
 cd $SITE_ROOT
-mkdir -p http.d
-source $SITE_ROOT/.env
-git="git -C $SITE_ROOT"
+VAR=$SITE_ROOT/vars
+
+if [ ! -d "$VAR" ]; then
+	mkdir $VAR
+fi
+DOMAIN=$(cat $VAR/DOMAIN)
+#source $SITE_ROOT/.env
 diff="diff -s"
-type="gateway"
-mbr="/massbit/massbitroute/app/src/sites/services/$type/mbr"
-script_run="/massbit/massbitroute/app/src/sites/services/$type/scripts/run"
-cmd="/massbit/massbitroute/app/src/sites/services/$type/cmd_server"
-nginx="$cmd nginx"
 mkdir -p http.d
-service_dir=/massbit/massbitroute/app/src/sites/services
-debug_log=$SITE_ROOT/logs/debug.log
-_git_config() {
-	$git config --global user.name "Vu Tran"
-	$git config --global user.email "baysao@gmail.com"
-}
-#!/bin/bash
-SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
-export HOME=/tmp
-cd $SITE_ROOT
-source $SITE_ROOT/.env
 git="git -C $SITE_ROOT"
+type="gateway"
 service_dir=/massbit/massbitroute/app/src/sites/services
 mbr="$service_dir/$type/mbr"
 script_run="$service_dir/$type/scripts/run"
@@ -33,7 +21,7 @@ nginx="$cmd nginx"
 debug_log=$SITE_ROOT/logs/debug.log
 nginx_error=$SITE_ROOT/logs/nginx_error.log
 user=massbit
-pass=41d919e74993945a97972d147c4d01847e8bc1b6
+pass=c671e4ea06280e7a3f6f9aea6e8155fcde9bc703
 log_dir=/massbit/massbitroute/app/src/sites/services/$type/logs
 _git_config() {
 	$git config --global user.name "Vu Tran"
@@ -138,16 +126,16 @@ _install() {
 
 	service=gbc
 	_dir=/massbit/massbitroute/app/$service
-	_url=http://$user:$pass@git.massbitroute.com/massbitroute/${service}.git
+	_url=https://github.com/massbitprotocol/massbitroute_gbc
 	_git_pull $service $_dir $_url
 
 	service=ssl
-	_url=http://$user:$pass@git.massbitroute.com/massbitroute/${service}.git
+	_url=http://$user:$pass@$git.${DOMAIN}/massbitroute/${service}.git
 	_dir=/etc/letsencrypt
 	_git_pull $service $_dir $_url
 
 	service=mkagent
-	_url=http://$user:$pass@git.massbitroute.com/massbitroute/${service}.git
+	_url=https://github.com/massbitprotocol/massbitroute_mkagent
 	_dir=$SITE_ROOT/etc/$service
 	_git_pull $service $_dir $_url
 

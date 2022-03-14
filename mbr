@@ -8,9 +8,6 @@ VAR=$DIR/vars
 if [ ! -d "$VAR" ]; then
 	mkdir $VAR
 fi
-APP_KEY=$(cat $VAR/APP_KEY)
-ID=$(cat $VAR/ID)
-MBRAPI=$(cat $VAR/MBRAPI)
 
 if [ -z "$MBRAPI" ]; then
 	MBRAPI=https://dapi.massbit.io
@@ -82,6 +79,7 @@ gw_ping() {
 	TOKEN=$(cat $VAR/TOKEN)
 	NETWORK=$(cat $VAR/NETWORK)
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
+	$MBRAPI=$(cat $VAR/$MBRAPI)
 	curl -s \
 		-X POST \
 		-H "Content-Type: application/json" \
@@ -93,11 +91,13 @@ gw_nodeverify() {
 	#	gw_apply
 	#	gw_nodekey
 	USER_ID=$(cat $VAR/USER_ID)
-	ID=$(cat $VAR/ID)
 	TOKEN=$(cat $VAR/TOKEN)
 	NETWORK=$(cat $VAR/NETWORK)
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
 	IP=$(cat $VAR/IP)
+	ID=$(cat $VAR/ID)
+  APP_KEY=$(cat $VAR/APP_KEY)
+  PORTAL_URL=$(cat $VAR/PORTAL_URL)
 	if [ -n "$IP" ]; then
 		IP=$(curl -s ipv4.icanhazip.com)
 		n=$(grep -o "\." <<<"$IP" | wc -l)
@@ -110,7 +110,7 @@ gw_nodeverify() {
 	curl -s \
 		-H "Content-Type: application/json" \
     -H "Authorization: $APP_KEY" \
-    "$MBRAPI/mbr/gateway/$ID/verify'"
+    "$PORTAL_URL/mbr/gateway/$ID/verify"
 
 }
 
@@ -118,14 +118,16 @@ gw_register() {
 	#	gw_apply
 	#	gw_nodekey
 	USER_ID=$(cat $VAR/USER_ID)
-	ID=$(cat $VAR/ID)
 	TOKEN=$(cat $VAR/TOKEN)
 	NETWORK=$(cat $VAR/NETWORK)
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
+	ID=$(cat $VAR/ID)
+  APP_KEY=$(cat $VAR/APP_KEY)
+  PORTAL_URL=$(cat $VAR/PORTAL_URL)
 	curl -s \
 		-H "Content-Type: application/json" \
     -H "Authorization: $APP_KEY" \
-    "$MBRAPI/mbr/gateway/$ID/register'"
+    "$PORTAL_URL/mbr/gateway/$ID/register"
 
 }
 gw_unregister() {
@@ -136,10 +138,13 @@ gw_unregister() {
 	TOKEN=$(cat $VAR/TOKEN)
 	NETWORK=$(cat $VAR/NETWORK)
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
+	ID=$(cat $VAR/ID)
+	APP_KEY=$(cat $VAR/APP_KEY)
+	PORTAL_URL=$(cat $VAR/PORTAL_URL)
 	curl -s \
 		-H "Content-Type: application/json" \
     -H "Authorization: $APP_KEY" \
-    "$MBRAPI/mbr/gateway/$ID/unregister'"
+    "$PORTAL_URL/mbr/gateway/$ID/unregister"
 
 }
 gw_set() {
