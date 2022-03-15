@@ -7,8 +7,13 @@ VAR=$SITE_ROOT/vars
 if [ ! -d "$VAR" ]; then
 	mkdir $VAR
 fi
-DOMAIN=$(cat $VAR/DOMAIN)
-#source $SITE_ROOT/.env
+ENV=$(cat $VAR/ENV)
+if [ "x$ENV" == "x" ]; then
+  source $SITE_ROOT/.env
+else
+  source $SITE_ROOT/.env.${ENV}
+fi
+
 diff="diff -s"
 mkdir -p http.d
 git="git -C $SITE_ROOT"
@@ -29,8 +34,8 @@ _git_config() {
 }
 _send_log() {
 	id=$(cat $SITE_ROOT/vars/ID)
-	# curl -X POST https://monitor.mbr.massbitroute.com/upload/gateway/${id}_monitor_client.log --data-binary @$log_dir/monitor_client.log
-	curl -X POST https://monitor.mbr.massbitroute.com/upload/gateway/$id --data-binary @$debug_log
+	# curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/${id}_monitor_client.log --data-binary @$log_dir/monitor_client.log
+	curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/$id --data-binary @$debug_log
 }
 _debug() {
 
@@ -66,7 +71,7 @@ _debug() {
 	cat $SITE_ROOT/.env >>$debug_log
 	echo >>$debug_log
 
-	curl -I https://dapi.massbit.io >>$debug_log
+	curl -I ${MBRAPI} >>$debug_log
 	echo "----Firewall" >>$debug_log
 	iptables -nL >>$debug_log
 	echo "----DNS resolve" >>$debug_log
@@ -140,7 +145,7 @@ _install() {
 	_git_pull $service $_dir $_url
 
 	# service=$type
-	# _url=http://$:$pass@git.massbitroute.com/massbitroute/${service}.git
+	# _url=http://$:$pass@git.${DOMAIN}/massbitroute/${service}.git
 	# _dir=$service_dir/$service
 	# _git_pull $service $_dir $_url
 
@@ -185,7 +190,7 @@ _update_network() {
 	conf=http.d/gw-${blnet}.conf
 	if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
 
-	curl -sSfL $MBR_API/deploy/${type}conf/${blnet}.conf -o ${conf}.new >/dev/null
+	curl -sSfL $MBRAPI/deploy/${type}conf/${blnet}.conf -o ${conf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}.new
 	fi
@@ -199,7 +204,7 @@ _update_network() {
 	conf=http.d/dapi-${blnet}.conf
 	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
 
-	curl -sSfL $MBR_API/deploy/dapiconf/${blnet}.conf -o ${conf}.new >/dev/null
+	curl -sSfL $MBRAPI/deploy/dapiconf/${blnet}.conf -o ${conf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}.new
 	fi
@@ -214,7 +219,7 @@ _update_network() {
 	conf=http.d/provider-${blnet}.conf
 	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
 
-	curl -sSfL $MBR_API/deploy/provider/${blnet}.conf -o ${conf}.new >/dev/null
+	curl -sSfL $MBRAPI/deploy/provider/${blnet}.conf -o ${conf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}.new
 	fi
@@ -233,7 +238,7 @@ _update_network() {
 		if [ $? -ne 0 ]; then
 			backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/,";");print}' $conf)
 			cat >http.d/gw-${blnet}.conf.orig.upstream <<EOF
-upstream ${blnet}.node.mbr.massbitroute.com {
+upstream ${blnet}.node.mbr.${DOMAIN}{
 }
 EOF
 		else
