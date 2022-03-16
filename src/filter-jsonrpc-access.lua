@@ -1,4 +1,5 @@
 local cjson = require("cjson")
+local set_var = ndk.set_var
 
 local function empty(s)
     return s == nil or s == ""
