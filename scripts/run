@@ -296,10 +296,12 @@ _monitor() {
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
 	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
+  sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
 
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
 	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
+  sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
 
 	if [ $is_reload -ne 0 ]; then
 		$0 _reload

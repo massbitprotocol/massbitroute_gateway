@@ -9,7 +9,9 @@ if [ ! -d "$VAR" ]; then
 	mkdir $VAR
 fi
 
-ENV=$(cat $VAR/ENV)
+if [ -f "$VAR/ENV" ]; then
+  ENV=$(cat $VAR/ENV)
+fi
 if [ "x$ENV" == "x" ]; then
   source $DIR/.env
 else
