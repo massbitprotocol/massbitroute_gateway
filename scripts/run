@@ -135,7 +135,7 @@ _install() {
 	_git_pull $service $_dir $_url
 
 	service=ssl
-	_url=http://$user:$pass@$git.${DOMAIN}/massbitroute/${service}.git
+	_url=http://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git
 	_dir=/etc/letsencrypt
 	_git_pull $service $_dir $_url
 
