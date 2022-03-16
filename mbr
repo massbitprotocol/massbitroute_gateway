@@ -9,10 +9,12 @@ if [ ! -d "$VAR" ]; then
 	mkdir $VAR
 fi
 
-if [ -z "$MBRAPI" ]; then
-	MBRAPI=https://dapi.massbit.io
+ENV=$(cat $VAR/ENV)
+if [ "x$ENV" == "x" ]; then
+  source $DIR/.env
+else
+  source $DIR/.env.${ENV}
 fi
-
 cd $DIR
 
 echo $DIR >$VAR/SITE_ROOT
@@ -79,7 +81,6 @@ gw_ping() {
 	TOKEN=$(cat $VAR/TOKEN)
 	NETWORK=$(cat $VAR/NETWORK)
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
-	$MBRAPI=$(cat $VAR/$MBRAPI)
 	curl -s \
 		-X POST \
 		-H "Content-Type: application/json" \
