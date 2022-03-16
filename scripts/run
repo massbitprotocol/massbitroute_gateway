@@ -3,6 +3,12 @@
 SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 export HOME=/tmp
 cd $SITE_ROOT
+if [ ! -f "$SITE_ROOT" ];then
+    echo ".env not found"
+    exit 1
+fi
+. $SITE_ROOT/.env
+
 mkdir -p http.d
 source $SITE_ROOT/.env
 git="git -C $SITE_ROOT"
@@ -36,8 +42,8 @@ user=massbit
 pass=41d919e74993945a97972d147c4d01847e8bc1b6
 log_dir=/massbit/massbitroute/app/src/sites/services/$type/logs
 _git_config() {
-	$git config --global user.name "Vu Tran"
-	$git config --global user.email "baysao@gmail.com"
+    	git -C $_dir config --global user.name $GIT_AUTH_NAME
+	git -C $_dir config --global user.email $GIT_AUTH_MAIL
 }
 _send_log() {
 	id=$(cat $SITE_ROOT/vars/ID)
