@@ -7,9 +7,9 @@ end
 
 if empty(ngx.var.arg_session) then
     ngx.header.location =
-        "https://session.mbr.massbitroute.com/api/v1?action=session.get&host=" ..
-        ngx.var.host .. "&token=" .. ngx.var.mbr_token
-    return ngx.exit(307)
+        "https://session.mbr.massbitroute.com/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
+
+    return ngx.exit(308)
 else
     local _session = ngx.var.arg_session
     ngx.log(ngx.ERR, "session:" .. _session)
@@ -20,9 +20,8 @@ else
     ngx.log(ngx.ERR, "token arg:" .. ngx.var.mbr_token)
     if not token or token ~= ngx.var.mbr_token then
         ngx.header.location =
-            "https://session.mbr.massbitroute.com/api/v1?action=session.get&host=" ..
-            ngx.var.host .. "&token=" .. ngx.var.mbr_token
-        return ngx.exit(307)
+            "https://session.mbr.massbitroute.com/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
+        return ngx.exit(308)
     end
 end
 
