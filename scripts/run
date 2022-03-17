@@ -150,19 +150,20 @@ _install() {
 	# pass=41d919e74993945a97972d147c4d01847e8bc1b6
 
 	service=gbc
-	_dir=/massbit/massbitroute/app/$service
-	_url=http://github.com/massbitprotocol/massbitroute_gbc
-	_git_pull $service $_dir $_url
-
-	service=ssl
-	_url=http://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git
-	_dir=/etc/letsencrypt
+	#_dir=/massbit/massbitroute/app/$service
+	#_url=https://github.com/massbitprotocol/massbitroute_gbc
 	#_git_pull $service $_dir $_url
-  _gitclone $service $_dir $_url
+ _gitclone https://github.com/massbitprotocol/massbitroute_gbc  /massbit/massbitroute/app/$service
+	service=ssl
+	#_url=https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git
+	#_dir=/etc/letsencrypt
+	#_git_pull $service $_dir $_url
+  _gitclone https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git  /etc/letsencrypt
 	service=mkagent
-	_url=http://github.com/massbitprotocol/massbitroute_mkagent
-	_dir=$SITE_ROOT/etc/$service
-	_gitclone $service $_dir $_url
+	#_url=https://github.com/massbitprotocol/massbitroute_mkagent
+	#_dir=$SITE_ROOT/etc/$service
+	#_git_pull $service $_dir $_url
+	_gitclone https://github.com/massbitprotocol/massbitroute_mkagent  $SITE_ROOT/etc/$service
 
 	# service=$type
 	# _url=http://$:$pass@git.${DOMAIN}/massbitroute/${service}.git
