@@ -3,7 +3,7 @@ SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 export HOME=/tmp
 cd $SITE_ROOT
 VAR=$SITE_ROOT/vars
-
+GITHUB_TRIES=10
 if [ ! -d "$VAR" ]; then
 	mkdir $VAR
 fi
@@ -113,7 +113,27 @@ _reload() {
 	# $mbr $type register
 	# $nginx -s reload
 }
-
+_gitclone() {
+  repo=$1
+  dest=$2
+  shift 2
+  rem="$@"
+  cmd="git clone $repo $dest $rem"
+  $cmd
+  st=$?
+  i=0
+  while [ \( $i -lt $GITHUB_TRIES \) -a \( $st -ne 0 \) ]; do
+    echo "Can not clone code from github $repo. Retrying ${i}th ... !"
+    $cmd
+    st=$?
+    i=$((i + 1))
+  done
+  if [ $st -ne 0 ]; then
+    echo "Can not clone code from github $repo after $GITHUB_TRIES tries!"
+    exit 1
+  fi
+  git -C $dest remote set-url origin $repo
+}
 _git_pull() {
 	service=$1
 	_dir=$2
@@ -137,12 +157,12 @@ _install() {
 	service=ssl
 	_url=http://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git
 	_dir=/etc/letsencrypt
-	_git_pull $service $_dir $_url
-
+	#_git_pull $service $_dir $_url
+  _gitclone $service $_dir $_url
 	service=mkagent
 	_url=http://github.com/massbitprotocol/massbitroute_mkagent
 	_dir=$SITE_ROOT/etc/$service
-	_git_pull $service $_dir $_url
+	_gitclone $service $_dir $_url
 
 	# service=$type
 	# _url=http://$:$pass@git.${DOMAIN}/massbitroute/${service}.git
