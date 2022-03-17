@@ -131,7 +131,7 @@ _install() {
 
 	service=gbc
 	_dir=/massbit/massbitroute/app/$service
-	_url=https://github.com/massbitprotocol/massbitroute_gbc
+	_url=http://github.com/massbitprotocol/massbitroute_gbc
 	_git_pull $service $_dir $_url
 
 	service=ssl
@@ -140,7 +140,7 @@ _install() {
 	_git_pull $service $_dir $_url
 
 	service=mkagent
-	_url=https://github.com/massbitprotocol/massbitroute_mkagent
+	_url=http://github.com/massbitprotocol/massbitroute_mkagent
 	_dir=$SITE_ROOT/etc/$service
 	_git_pull $service $_dir $_url
 
