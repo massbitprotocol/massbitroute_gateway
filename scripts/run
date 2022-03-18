@@ -327,13 +327,13 @@ _monitor() {
 		/etc/letsencrypt; do
 		git -C $d pull origin master | grep -i "updating"
 		if [ $? -eq 0 ]; then
-			is_reload=1
+			is_reloading=1
 		fi
 	done
 
 
 
-	if [ $is_reload -ne 0 ]; then
+	if [ $is_reloading -ne 0 ]; then
 		$0 _reload
 	fi
 	#	$0 _reload
