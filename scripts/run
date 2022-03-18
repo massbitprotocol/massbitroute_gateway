@@ -271,18 +271,51 @@ EOF
 	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway.conf >http.d/gateway.conf0
 	return $_reload
 }
+_load_config() {
+  	mkdir -p http.d
+  	# rm -f http.d/dapi*
+    is_loading=0
+    id=$(cat $SITE_ROOT/vars/ID)
+  	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
+  	network=$(cat $SITE_ROOT/vars/NETWORK)
 
+  	if [ ! -d "$SITE_ROOT/vars" ]; then mkdir -p $SITE_ROOT/vars; fi
+  	echo $type >$SITE_ROOT/vars/TYPE
+  	# if [ "$blockchain" = "all" ]; then
+  	# 	for blockchain in avax bsc dot eth ftm matic near sol; do
+  	# 		_update_network $blockchain $network $id
+  	# 		st=$?
+  	# 		echo $st
+  	# 		if [ $st -eq 1 ]; then
+  	# 			is_loading=1
+  	# 		fi
+
+  	# 	done
+  	# else
+  	_update_network $blockchain $network $id
+  	st=$?
+  	echo $st
+  	if [ $st -eq 1 ]; then
+  		is_loading=1
+  	fi
+
+  	# fi
+
+  	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
+  	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
+  	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
+    sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
+
+  	sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
+  	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
+  	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
+    sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
+    echo $is_loading
+}
 _monitor() {
 	# $mbr $type register
-	mkdir -p http.d
-	# rm -f http.d/dapi*
-	is_reload=0
-	id=$(cat $SITE_ROOT/vars/ID)
-	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
-	network=$(cat $SITE_ROOT/vars/NETWORK)
+	is_reloading=$(_load_config)
 
-	if [ ! -d "$SITE_ROOT/vars" ]; then mkdir -p $SITE_ROOT/vars; fi
-	echo $type >$SITE_ROOT/vars/TYPE
 
 	for d in /massbit/massbitroute/app/gbc \
 		$SITE_ROOT \
@@ -294,35 +327,7 @@ _monitor() {
 		fi
 	done
 
-	# if [ "$blockchain" = "all" ]; then
-	# 	for blockchain in avax bsc dot eth ftm matic near sol; do
-	# 		_update_network $blockchain $network $id
-	# 		st=$?
-	# 		echo $st
-	# 		if [ $st -eq 1 ]; then
-	# 			is_reload=1
-	# 		fi
 
-	# 	done
-	# else
-	_update_network $blockchain $network $id
-	st=$?
-	echo $st
-	if [ $st -eq 1 ]; then
-		is_reload=1
-	fi
-
-	# fi
-
-	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
-	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
-	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
-  sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
-
-	sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
-	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
-	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
-  sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
 
 	if [ $is_reload -ne 0 ]; then
 		$0 _reload
