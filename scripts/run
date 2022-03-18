@@ -144,8 +144,8 @@ _git_pull() {
 
 }
 _install() {
+  git config --global http.sslverify false
 	mkdir -p $service_dir $SITE_ROOT/etc $SITE_ROOT/logs
-
 	# user=massbit
 	# pass=41d919e74993945a97972d147c4d01847e8bc1b6
 
@@ -158,6 +158,9 @@ _install() {
 	#_url=https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git
 	#_dir=/etc/letsencrypt
 	#_git_pull $service $_dir $_url
+	if [ -d "/etc/letsencrypt/ssl" ]; then
+    rm -rf /etc/letsencrypt/ssl
+  fi
   _gitclone https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git  /etc/letsencrypt
 	service=mkagent
 	#_url=https://github.com/massbitprotocol/massbitroute_mkagent
@@ -175,6 +178,7 @@ _install() {
 	apt-get update
 	apt-get install -y git apache2-utils supervisor jq python-is-python2 libssl-dev libmaxminddb-dev
 	mkdir -p /etc/supervisor/conf.d
+	rm /etc/supervisor/conf.d/node.conf /etc/supervisor/conf.d/gateway.conf
 	cp supervisor.conf /etc/supervisor/conf.d/${type}.conf
 	systemctl enable supervisor
 	systemctl start supervisor
