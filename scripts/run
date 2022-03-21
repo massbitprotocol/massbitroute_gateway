@@ -314,12 +314,12 @@ _load_config() {
   	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
   	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
     sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
-    echo $is_loading
+    return $is_loading
 }
 _monitor() {
 	# $mbr $type register
-	is_reloading=$(_load_config)
-
+	_load_config
+	is_reloading=$?
 
 	for d in /massbit/massbitroute/app/gbc \
 		$SITE_ROOT \
