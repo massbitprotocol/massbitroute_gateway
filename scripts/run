@@ -157,7 +157,7 @@ _install() {
 	_gitclone https://github.com/massbitprotocol/massbitroute_gbc  $dest
 
 	service=ssl
-	dest=/etc/letsencrypt/$service
+	dest=/etc/letsencrypt
 	if [ -d "$dest" ]; then
 	  rm -rf $dest
 	fi
