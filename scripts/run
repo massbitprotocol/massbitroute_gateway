@@ -150,9 +150,9 @@ _install() {
 	# pass=41d919e74993945a97972d147c4d01847e8bc1b6
 
 	service=gbc
-	dest=/massbit/massbitroute/app
-	if [ -d "$dest/$service" ]; then
-	  rm -rf $dest/$service
+	dest=/massbit/massbitroute/app/$service
+	if [ -d "$dest" ]; then
+	  rm -rf $dest
 	fi
 	_gitclone https://github.com/massbitprotocol/massbitroute_gbc  $dest
 
