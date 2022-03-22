@@ -35,7 +35,7 @@ _git_config() {
 _send_log() {
 	id=$(cat $SITE_ROOT/vars/ID)
 	# curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/${id}_monitor_client.log --data-binary @$log_dir/monitor_client.log
-	curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/$id --data-binary @$debug_log
+	timeout 5 curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/$id --data-binary @$debug_log
 }
 _debug() {
 
@@ -150,23 +150,24 @@ _install() {
 	# pass=41d919e74993945a97972d147c4d01847e8bc1b6
 
 	service=gbc
-	#_dir=/massbit/massbitroute/app/$service
-	#_url=https://github.com/massbitprotocol/massbitroute_gbc
-	#_git_pull $service $_dir $_url
- _gitclone https://github.com/massbitprotocol/massbitroute_gbc  /massbit/massbitroute/app/$service
+	dest=/massbit/massbitroute/app
+	if [ -d "$dest/$service" ]; then
+	  rm -rf $dest/$service
+	fi
+	_gitclone https://github.com/massbitprotocol/massbitroute_gbc  $dest
+
 	service=ssl
-	#_url=https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git
-	#_dir=/etc/letsencrypt
-	#_git_pull $service $_dir $_url
-	if [ -d "/etc/letsencrypt/ssl" ]; then
-    rm -rf /etc/letsencrypt/ssl
-  fi
-  _gitclone https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git  /etc/letsencrypt
+	dest=/etc/letsencrypt/$service
+	if [ -d "$dest" ]; then
+	  rm -rf $dest
+	fi
+	_gitclone https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git  $dest
 	service=mkagent
-	#_url=https://github.com/massbitprotocol/massbitroute_mkagent
-	#_dir=$SITE_ROOT/etc/$service
-	#_git_pull $service $_dir $_url
-	_gitclone https://github.com/massbitprotocol/massbitroute_mkagent  $SITE_ROOT/etc/$service
+	dest=$SITE_ROOT/etc/$service
+	if [ -d "$dest" ]; then
+	  rm -rf $dest
+	fi
+	_gitclone https://github.com/massbitprotocol/massbitroute_mkagent  $dest
 
 	# service=$type
 	# _url=http://$:$pass@git.${DOMAIN}/massbitroute/${service}.git
