@@ -11,39 +11,7 @@ REPOS="/etc/letsencrypt|$GIT_PRIVATE_READ_URL/massbitroute/ssl.git|master \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
 $SITE_ROOT/etc/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git"
 
-# SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
-# export HOME=/tmp
-# cd $SITE_ROOT
-# VAR=$SITE_ROOT/vars
-# GITHUB_TRIES=10
-# if [ ! -d "$VAR" ]; then
-# 	mkdir $VAR
-# fi
-# ENV=$(cat $VAR/ENV)
-# if [ "x$ENV" == "x" ]; then
-#   source $SITE_ROOT/.env
-# else
-#   source $SITE_ROOT/.env.${ENV}
-# fi
-
 diff="diff -s"
-mkdir -p http.d
-git="git -C $SITE_ROOT"
-type="gateway"
-service_dir=/massbit/massbitroute/app/src/sites/services
-mbr="$service_dir/$type/mbr"
-script_run="$service_dir/$type/scripts/run"
-cmd="$service_dir/$type/cmd_server"
-nginx="$cmd nginx"
-debug_log=$SITE_ROOT/logs/debug.log
-nginx_error=$SITE_ROOT/logs/nginx_error.log
-user=massbit
-pass=c671e4ea06280e7a3f6f9aea6e8155fcde9bc703
-log_dir=/massbit/massbitroute/app/src/sites/services/$type/logs
-# _git_config() {
-# 	$git config --global user.name "Vu Tran"
-# 	$git config --global user.email "baysao@gmail.com"
-# }
 
 _debug() {
 	timeout 60 $SITE_ROOT/scripts/debug.sh
@@ -52,41 +20,9 @@ _debug() {
 _reload() {
 	_debug
 	$SITE_ROOT/etc/mkagent/agents/push.sh _kill
-	$cmd _update
-	# $cmd update
-	# $mbr $type register
-	# $nginx -s reload
+	$SITE_ROOT/cmd_server _update
 }
-# _gitclone() {
-# 	repo=$1
-# 	dest=$2
-# 	shift 2
-# 	rem="$@"
-# 	cmd="git clone $repo $dest $rem"
-# 	$cmd
-# 	st=$?
-# 	i=0
-# 	while [ \( $i -lt $GITHUB_TRIES \) -a \( $st -ne 0 \) ]; do
-# 		echo "Can not clone code from github $repo. Retrying ${i}th ... !"
-# 		$cmd
-# 		st=$?
-# 		i=$((i + 1))
-# 	done
-# 	if [ $st -ne 0 ]; then
-# 		echo "Can not clone code from github $repo after $GITHUB_TRIES tries!"
-# 		exit 1
-# 	fi
-# 	git -C $dest remote set-url origin $repo
-# }
-# _git_pull() {
-# 	service=$1
-# 	_dir=$2
-# 	_url=$3
-# 	git clone $_url $_dir
-# 	git -C $_dir remote set-url origin $_url
-# 	git -C $_dir pull origin master
 
-# }
 _install() {
 	mkdir -p $SITE_ROOT/logs $SITE_ROOT/db
 	_git_config
@@ -108,68 +44,7 @@ _install() {
 	mkdir -p /etc/supervisor/conf.d
 	cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
 	supervisorctl update
-
-	# git config --global http.sslverify false
-	# mkdir -p $service_dir $SITE_ROOT/etc $SITE_ROOT/logs
-	# # user=massbit
-	# # pass=41d919e74993945a97972d147c4d01847e8bc1b6
-
-	# service=gbc
-	# dest=/massbit/massbitroute/app/$service
-	# if [ -d "$dest" ]; then
-	# 	rm -rf $dest
-	# fi
-	# _gitclone https://github.com/massbitprotocol/massbitroute_gbc $dest
-
-	# service=ssl
-	# dest=/etc/letsencrypt
-	# if [ -d "$dest" ]; then
-	# 	rm -rf $dest
-	# fi
-	# _gitclone https://$user:$pass@git.${DOMAIN}/massbitroute/${service}.git $dest
-	# service=mkagent
-	# dest=$SITE_ROOT/etc/$service
-	# if [ -d "$dest" ]; then
-	# 	rm -rf $dest
-	# fi
-	# _gitclone https://github.com/massbitprotocol/massbitroute_mkagent $dest
-
-	# # service=$type
-	# # _url=http://$:$pass@git.${DOMAIN}/massbitroute/${service}.git
-	# # _dir=$service_dir/$service
-	# # _git_pull $service $_dir $_url
-
-	# ln -sf /massbit/massbitroute/app/gbc /massbit/massbitroute/app/src/gbc
-	# ln -sf /massbit/massbitroute/app/gbc/bin/openresty /usr/local/openresty
-	# apt-get update
-	# apt-get install -y git apache2-utils supervisor jq python-is-python2 libssl-dev libmaxminddb-dev
-	# mkdir -p /etc/supervisor/conf.d
-	# rm /etc/supervisor/conf.d/node.conf /etc/supervisor/conf.d/gateway.conf
-	# cp supervisor.conf /etc/supervisor/conf.d/${type}.conf
-	# systemctl enable supervisor
-	# systemctl start supervisor
-	# supervisorctl update
 }
-
-# loop() {
-# 	while true; do
-# 		$0 $@
-# 		sleep 3
-# 	done
-# }
-
-# _deprecate() {
-
-# 	n=$(ls http.d/*.conf | wc -l)
-# 	if [ $n -ne 2 ]; then
-# 		echo rm -rf http.d/*
-# 	fi
-# }
-# _update_src() {
-# 	cd gbc
-# 	git pull origin master
-# 	cd $SITE_ROOT
-# }
 
 _update_network() {
 	blockchain=$1
@@ -249,27 +124,12 @@ _load_config() {
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	network=$(cat $SITE_ROOT/vars/NETWORK)
 
-	if [ ! -d "$SITE_ROOT/vars" ]; then mkdir -p $SITE_ROOT/vars; fi
-	echo $type >$SITE_ROOT/vars/TYPE
-	# if [ "$blockchain" = "all" ]; then
-	# 	for blockchain in avax bsc dot eth ftm matic near sol; do
-	# 		_update_network $blockchain $network $id
-	# 		st=$?
-	# 		echo $st
-	# 		if [ $st -eq 1 ]; then
-	# 			is_loading=1
-	# 		fi
-
-	# 	done
-	# else
 	_update_network $blockchain $network $id
 	st=$?
 	echo $st
 	if [ $st -eq 1 ]; then
 		is_loading=1
 	fi
-
-	# fi
 
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
@@ -285,7 +145,6 @@ _load_config() {
 _monitor() {
 	echo gateway >vars/TYPE
 	is_reload=0
-	# $mbr $type register
 	_load_config
 	is_reload=$?
 
@@ -298,26 +157,9 @@ _monitor() {
 		$0 _reload
 	fi
 
-	# for d in /massbit/massbitroute/app/gbc \
-	# 	$SITE_ROOT \
-	# 	$SITE_ROOT/etc/mkagent \
-	# 	/etc/letsencrypt; do
-	# 	git -C $d pull origin master | grep -i "updating"
-	# 	if [ $? -eq 0 ]; then
-	# 		is_reloading=1
-	# 	fi
-	# done
-
-	# if [ $is_reloading -ne 0 ]; then
-	# 	$0 _reload
-	# fi
-	# #	$0 _reload
-	# $cmd start all
-
 }
 
 _run() {
-	# pkill -9 prometheus grafana-server
 	rm -rf $SITE_ROOT/tmp/*
 	$SITE_ROOT/start_server
 }
