@@ -56,7 +56,7 @@ _update_network() {
 	conf=http.d/gw-${blnet}.conf
 	if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
 
-	curl -sSfL $MBRAPI/deploy/${type}conf/${blnet}.conf -o ${conf}.new >/dev/null
+	curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}.conf -o ${conf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}.new
 	fi
