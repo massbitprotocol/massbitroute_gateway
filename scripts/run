@@ -30,6 +30,7 @@ _reload() {
 }
 
 _init() {
+	source $SITE_ROOT/.env
 	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
 	bash $SITE_ROOT/cmd_server _env
 	source $SITE_ROOT/.env_raw
