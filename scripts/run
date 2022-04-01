@@ -12,10 +12,14 @@ cd $SITE_ROOT
 
 GIT_PUBLIC_URL="https://github.com"
 
-REPOS="/etc/letsencrypt|$GIT_PRIVATE_READ_URL/massbitroute/ssl.git|master \
+_repo() {
+	REPOS="/etc/letsencrypt|$GIT_PRIVATE_READ_URL/massbitroute/ssl.git|master \
 /massbit/massbitroute/app/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
 $SITE_ROOT/etc/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git"
+}
+
+_repo
 
 diff="diff -s"
 
@@ -34,7 +38,7 @@ _init() {
 	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
 	bash $SITE_ROOT/cmd_server _env
 	source $SITE_ROOT/.env_raw
-
+	_repo
 }
 _install() {
 	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/db
