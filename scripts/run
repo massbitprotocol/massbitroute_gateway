@@ -3,7 +3,7 @@ TYPE="gateway"
 SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 mkdir -p $SITE_ROOT
 export HOME=$SITE_ROOT
-if [ -h "$SITE_ROOT/cmd_server"]; then bash $SITE_ROOT/cmd_server _env; fi
+if [ -h "$SITE_ROOT/cmd_server" ]; then bash $SITE_ROOT/cmd_server _env; fi
 if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
 
 source $SITE_ROOT/scripts/base.sh
