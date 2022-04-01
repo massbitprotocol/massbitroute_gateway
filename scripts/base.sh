@@ -24,7 +24,7 @@ _git_clone() {
 	if [ "$_dir/.git" ]; then
 		git -C $_dir pull origin $_branch
 	else
-		git -C $_dir clone $_url $_dir -b $_branch
+		git clone $_url $_dir -b $_branch
 		git -C $_dir branch --set-upstream-to=origin/$_branch
 	fi
 }
