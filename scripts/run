@@ -27,6 +27,9 @@ _debug() {
 	timeout 60 $SITE_ROOT/scripts/debug.sh
 }
 
+_prepare() {
+	echo "Prepare"
+}
 _reload() {
 	_debug
 	$SITE_ROOT/etc/mkagent/agents/push.sh _kill
@@ -43,6 +46,7 @@ _init() {
 _install() {
 	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/db
 	_git_config
+	_prepare
 	_init
 	for _pathgit in $REPOS; do
 		_path=$(echo $_pathgit | cut -d'|' -f1)
