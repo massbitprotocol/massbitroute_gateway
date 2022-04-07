@@ -15,7 +15,6 @@ service_dir=$mbr_root/src/sites/services
 
 GIT_PUBLIC_URL="https://github.com"
 export MBR_ENV=${MBR_ENV:-dev}
-export GIT_PRIVATE_READ_URL="http://massbit:c671e4ea06280e7a3f6f9aea6e8155fcde9bc703@git.massbitroute.dev"
 
 _repo() {
 	REPOS="/etc/letsencrypt|$GIT_PRIVATE_READ_URL/massbitroute/ssl.git|master \
@@ -49,7 +48,7 @@ _init() {
 	_repo
 }
 _install() {
-	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/db
+	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/db $SITE_ROOT/cache $SITE_ROOT/cache_gateway $SITE_ROOT/tmp
 	_git_config
 	_prepare
 	_init
