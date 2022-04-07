@@ -10,13 +10,18 @@ source $SITE_ROOT/scripts/base.sh
 # _load_env $SITE_ROOT
 cd $SITE_ROOT
 
+mbr_root=/massbit/massbitroute/app
+service_dir=$mbr_root/src/sites/services
+
 GIT_PUBLIC_URL="https://github.com"
+export MBR_ENV=${MBR_ENV:-dev}
+export GIT_PRIVATE_READ_URL="http://massbit:c671e4ea06280e7a3f6f9aea6e8155fcde9bc703@git.massbitroute.dev"
 
 _repo() {
 	REPOS="/etc/letsencrypt|$GIT_PRIVATE_READ_URL/massbitroute/ssl.git|master \
-/massbit/massbitroute/app/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
+$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
-$SITE_ROOT/etc/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git"
+$service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
 }
 
 _repo
@@ -164,14 +169,23 @@ _load_config() {
 	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
 	return $is_loading
 }
+
+_update() {
+	echo "Update"
+	st=0
+	_load_config
+	st=$?
+	return $st
+}
+
 _monitor() {
 	echo gateway >vars/TYPE
 	is_reload=0
-	_load_config
+	_update_sources $REPOS
 	is_reload=$?
 
-	_update_sources $REPOS
-	if [ $is_reload -eq 0 ]; then
+	_update
+	if [ $is_reload -ne 0 ]; then
 		is_reload=$?
 	fi
 
