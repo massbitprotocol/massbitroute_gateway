@@ -34,7 +34,7 @@ _debug() {
 }
 
 _reload() {
-	_debug
+	#	_debug
 	$SITE_ROOT/etc/mkagent/agents/push.sh _kill
 	$SITE_ROOT/cmd_server _update
 }
