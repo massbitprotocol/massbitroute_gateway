@@ -186,7 +186,7 @@ _monitor() {
 	is_reload=$?
 
 	_update
-	if [ $is_reload -ne 0 ]; then
+	if [ $is_reload -eq 0 ]; then
 		is_reload=$?
 	fi
 

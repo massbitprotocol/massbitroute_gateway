@@ -9,3 +9,5 @@ node.d/massbit/massbitroute/*.conf
 http.conf
 nginx.conf
 etc/htpasswd
+/.env_raw
+/src/env.lua
