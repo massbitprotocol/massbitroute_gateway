@@ -173,27 +173,41 @@ _load_config() {
 	return $is_loading
 }
 
+_update_repos() {
+	_repo
+	_update_sources $REPOS
+	_st_repo=$?
+	return $_st_repo
+}
+
 _update() {
 	echo "Update"
-	st=0
+	_st_update=0
+
+	_update_repos
+	_st_update=$?
+
 	_load_config
-	st=$?
-	return $st
+	if [ $_st_update -eq 0 ]; then
+		_st_update=$?
+	fi
+
+	return $_st_update
 }
 
 _monitor() {
 	echo gateway >vars/TYPE
-	is_reload=0
-	_update_sources $REPOS
-	is_reload=$?
+	# is_reload=0
+	# _update_sources $REPOS
+	# is_reload=$?
 
 	_update
-	_a_st=$?
-	if [ $is_reload -eq 0 ]; then
-		is_reload=$_a_st
-	fi
+	_st_monitor=$?
+	# if [ $is_reload -eq 0 ]; then
+	# 	is_reload=$_a_st
+	# fi
 
-	if [ $is_reload -ne 0 ]; then
+	if [ $_st_monitor -ne 0 ]; then
 		$0 _reload
 	fi
 
