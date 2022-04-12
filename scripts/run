@@ -80,8 +80,11 @@ _update_network() {
 	blockchain=$1
 	network=$2
 	id=$3
-	blnet=${blockchain}-${network}
 	_reload=0
+	if [ -z "$blockchain" ]; then return $_reload; fi
+	if [ -z "$network" ]; then return $_reload; fi
+	if [ -z "$id" ]; then return $_reload; fi
+	blnet=${blockchain}-${network}
 
 	conf=http.d/gw-${blnet}.conf
 	if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
