@@ -29,9 +29,9 @@ _repo
 
 diff="diff -s"
 
-_debug() {
-	timeout 60 $SITE_ROOT/scripts/debug.sh
-}
+# _debug() {
+# 	timeout 60 $SITE_ROOT/scripts/debug.sh
+# }
 
 _reload() {
 	#	_debug
@@ -39,16 +39,29 @@ _reload() {
 	$SITE_ROOT/cmd_server _update
 }
 
-_prepare() {
-	echo "Prepare"
+_init() {
+
+	if [ ! -f "$SITE_ROOT/.env" ]; then
+		echo "$MBR_ENV" >$SITE_ROOT/.env
+	fi
 
 	source $SITE_ROOT/.env
+
 	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
+
 	bash $SITE_ROOT/cmd_server _env
 	source $SITE_ROOT/.env_raw
 	_repo
 }
+
+_prepare() {
+	echo "Prepare"
+
+	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/db $SITE_ROOT/cache $SITE_ROOT/cache_gateway $SITE_ROOT/tmp
+
+}
 _install_repos() {
+	_git_config
 	_repo
 	for _pathgit in $REPOS; do
 		_path=$(echo $_pathgit | cut -d'|' -f1)
@@ -57,12 +70,7 @@ _install_repos() {
 		_git_clone $_url $_path $_branch
 	done
 }
-_install() {
-	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/db $SITE_ROOT/cache $SITE_ROOT/cache_gateway $SITE_ROOT/tmp
-	_git_config
-	_prepare
-	_install_repos
-
+_supervisor() {
 	ln -sf /massbit/massbitroute/app/gbc /massbit/massbitroute/app/src/gbc
 	ln -sf /massbit/massbitroute/app/gbc/bin/openresty /usr/local/openresty
 	apt-get update
@@ -74,6 +82,12 @@ _install() {
 	mkdir -p /etc/supervisor/conf.d
 	cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
 	supervisorctl update
+}
+_install() {
+	_init
+	_prepare
+	_install_repos
+	_supervisor
 }
 
 _update_network() {
@@ -200,16 +214,8 @@ _update() {
 
 _monitor() {
 	echo gateway >vars/TYPE
-	# is_reload=0
-	# _update_sources $REPOS
-	# is_reload=$?
-
 	_update
 	_st_monitor=$?
-	# if [ $is_reload -eq 0 ]; then
-	# 	is_reload=$_a_st
-	# fi
-
 	if [ $_st_monitor -ne 0 ]; then
 		$0 _reload
 	fi
