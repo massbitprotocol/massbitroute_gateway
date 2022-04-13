@@ -171,6 +171,10 @@ _load_config() {
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	network=$(cat $SITE_ROOT/vars/NETWORK)
 
+	if [ -z "$blockchain" ]; then return $is_loading; fi
+	if [ -z "$network" ]; then return $is_loading; fi
+	if [ -z "$id" ]; then return $is_loading; fi
+
 	_update_network $blockchain $network $id
 	st=$?
 	echo $st
