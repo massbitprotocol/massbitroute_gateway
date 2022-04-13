@@ -168,12 +168,13 @@ _load_config() {
 	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
-	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
-	network=$(cat $SITE_ROOT/vars/NETWORK)
-
-	if [ -z "$blockchain" ]; then return $is_loading; fi
-	if [ -z "$network" ]; then return $is_loading; fi
 	if [ -z "$id" ]; then return $is_loading; fi
+
+	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
+	if [ -z "$blockchain" ]; then return $is_loading; fi
+
+	network=$(cat $SITE_ROOT/vars/NETWORK)
+	if [ -z "$network" ]; then return $is_loading; fi
 
 	_update_network $blockchain $network $id
 	st=$?
