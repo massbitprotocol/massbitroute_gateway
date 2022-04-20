@@ -16,11 +16,8 @@ service_dir=$mbr_root/src/sites/services
 GIT_PUBLIC_URL="https://github.com"
 export MBR_ENV=${MBR_ENV:-dev}
 
-export GIT_PRIVATE_READ_URL="http://massbit:c671e4ea06280e7a3f6f9aea6e8155fcde9bc703@git.massbitroute.dev"
-
 _repo() {
-	REPOS="/etc/letsencrypt|$GIT_PRIVATE_READ_URL/massbitroute/ssl.git|master \
-$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
+	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
 $service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
 }
@@ -101,17 +98,41 @@ _update_network() {
 	if [ -z "$id" ]; then return $_reload; fi
 	blnet=${blockchain}-${network}
 
-	conf=http.d/gw-${blnet}.conf
+	conf=http.d/gw-${blnet}
 	if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
 
-	curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}.conf -o ${conf}.new >/dev/null
+	# curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}.conf -o ${conf}.new >/dev/null
+	# if [ $? -ne 0 ]; then
+	# 	touch ${conf}.new
+	# fi
+
+	# $diff ${conf}.orig ${conf}.new >/dev/null
+	# if [ $? -ne 0 ]; then
+	# 	cp ${conf}.new ${conf}.orig
+	# 	_reload=1
+	# fi
+
+	curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
-		touch ${conf}.new
+		touch ${conf}-nodes.new
 	fi
 
-	$diff ${conf}.orig ${conf}.new >/dev/null
+	$diff ${conf}-nodes.orig ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
-		cp ${conf}.new ${conf}.orig
+		cp ${conf}-nodes.new ${conf}-nodes.orig
+		cp ${conf}-nodes.new ${conf}-nodes.conf
+		_reload=1
+	fi
+
+	curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
+	if [ $? -ne 0 ]; then
+		touch ${conf}-upstreams.new
+	fi
+
+	$diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
+	if [ $? -ne 0 ]; then
+		cp ${conf}-upstreams.new ${conf}-upstreams.orig
+		cp ${conf}-upstreams.new ${conf}-upstreams.conf
 		_reload=1
 	fi
 
@@ -130,37 +151,37 @@ _update_network() {
 		_reload=1
 	fi
 
-	conf=http.d/provider-${blnet}.conf
-	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
+	# 	conf=http.d/provider-${blnet}.conf
+	# 	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
 
-	curl -sSfL $MBRAPI/deploy/provider/${blnet}.conf -o ${conf}.new >/dev/null
-	if [ $? -ne 0 ]; then
-		touch ${conf}.new
-	fi
+	# 	curl -sSfL $MBRAPI/deploy/provider/${blnet}.conf -o ${conf}.new >/dev/null
+	# 	if [ $? -ne 0 ]; then
+	# 		touch ${conf}.new
+	# 	fi
 
-	$diff ${conf}.orig ${conf}.new >/dev/null
-	if [ $? -ne 0 ]; then
-		cp ${conf}.new ${conf}.orig
-		cp ${conf}.orig ${conf}
-		_reload=1
-	fi
+	# 	$diff ${conf}.orig ${conf}.new >/dev/null
+	# 	if [ $? -ne 0 ]; then
+	# 		cp ${conf}.new ${conf}.orig
+	# 		cp ${conf}.orig ${conf}
+	# 		_reload=1
+	# 	fi
 
-	backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/," backup ;");print}' $conf)
+	# 	backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/," backup ;");print}' $conf)
 
-	if [ -n "$backup" ]; then
-		grep server http.d/gw-${blnet}.conf.orig >/dev/null
-		if [ $? -ne 0 ]; then
-			backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/,";");print}' $conf)
-			cat >http.d/gw-${blnet}.conf.orig.upstream <<EOF
-upstream ${blnet}.node.mbr.${DOMAIN}{
-}
-EOF
-		else
-			cp http.d/gw-${blnet}.conf.orig http.d/gw-${blnet}.conf.orig.upstream
-		fi
-		sed "/upstream/ a $backup" http.d/gw-${blnet}.conf.orig.upstream >http.d/gw-${blnet}.conf
-		cat http.d/gw-${blnet}.conf
-	fi
+	# 	if [ -n "$backup" ]; then
+	# 		grep server http.d/gw-${blnet}.conf.orig >/dev/null
+	# 		if [ $? -ne 0 ]; then
+	# 			backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/,";");print}' $conf)
+	# 			cat >http.d/gw-${blnet}.conf.orig.upstream <<EOF
+	# upstream ${blnet}.node.mbr.${DOMAIN}{
+	# }
+	# EOF
+	# 		else
+	# 			cp http.d/gw-${blnet}.conf.orig http.d/gw-${blnet}.conf.orig.upstream
+	# 		fi
+	# 		sed "/upstream/ a $backup" http.d/gw-${blnet}.conf.orig.upstream >http.d/gw-${blnet}.conf
+	# 		cat http.d/gw-${blnet}.conf
+	# 	fi
 	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway.conf >http.d/gateway.conf0
 	return $_reload
 }
