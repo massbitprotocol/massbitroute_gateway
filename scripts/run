@@ -227,6 +227,7 @@ _update_repos() {
 
 _update() {
 	echo "Update"
+	$SITE_ROOT/mbr node nodeverify
 	_st_update=0
 
 	_update_repos
