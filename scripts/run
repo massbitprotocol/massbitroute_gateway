@@ -92,6 +92,8 @@ _update_network() {
 	blockchain=$1
 	network=$2
 	id=$3
+	continent=$4
+	country=$5
 	_reload=0
 	if [ -z "$blockchain" ]; then return $_reload; fi
 	if [ -z "$network" ]; then return $_reload; fi
@@ -148,6 +150,9 @@ _update_network() {
 	if [ $? -ne 0 ]; then
 		cp ${conf}.new ${conf}.orig
 		sed "s/__GATEWAY_ID__/$id/g" ${conf}.orig >$conf
+		if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
+			sed "s/proxy_pass http\:\/\/${blockchain}-${network}\.node\.mbr/proxy_pass http\:\/\/${blockchain}-${network}-${continent}-${country}\.node\.mbr/g" -i $conf
+		fi
 		_reload=1
 	fi
 
@@ -199,7 +204,10 @@ _load_config() {
 	network=$(cat $SITE_ROOT/vars/NETWORK)
 	if [ -z "$network" ]; then return $is_loading; fi
 
-	_update_network $blockchain $network $id
+	continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+
+	_update_network $blockchain $network $id $continent $country
 	st=$?
 	echo $st
 	if [ $st -ne 0 ]; then
