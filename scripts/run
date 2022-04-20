@@ -192,7 +192,7 @@ _update_network() {
 }
 _load_config() {
 	mkdir -p http.d
-	# rm http.d/*
+	rm http.d/*
 	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
@@ -226,6 +226,11 @@ _load_config() {
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
 	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
 	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
+
+	if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
+		sed "s/proxy_pass http\:\/\/${blockchain}-${network}\.node\.mbr/proxy_pass http\:\/\/${blockchain}-${network}-${continent}-${country}\.node\.mbr/g" -i http.d/gateway.conf9
+	fi
+
 	return $is_loading
 }
 
