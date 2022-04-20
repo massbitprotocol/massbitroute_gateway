@@ -191,8 +191,7 @@ _update_network() {
 	return $_reload
 }
 _load_config() {
-	mkdir -p http.d
-	rm http.d/*
+
 	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
@@ -243,7 +242,9 @@ _update_repos() {
 
 _update() {
 	echo "Update"
-	#	$SITE_ROOT/mbr node nodeverify
+	mkdir -p http.d
+	rm http.d/*
+	$SITE_ROOT/mbr node nodeinfo
 	_st_update=0
 
 	_update_repos
