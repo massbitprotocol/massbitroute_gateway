@@ -207,6 +207,9 @@ _load_config() {
 	continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
 	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 
+	if [ "$continent" == "null" ]; then continent=""; fi
+	if [ "$country" == "null" ]; then country=""; fi
+
 	_update_network $blockchain $network $id $continent $country
 	st=$?
 	echo $st
