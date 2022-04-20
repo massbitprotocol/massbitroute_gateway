@@ -10,12 +10,12 @@ if [ ! -d "$VAR" ]; then
 fi
 
 if [ -f "$VAR/ENV" ]; then
-  ENV=$(cat $VAR/ENV)
+	ENV=$(cat $VAR/ENV)
 fi
 if [ "x$ENV" == "x" ]; then
-  source $DIR/.env
+	source $DIR/.env
 else
-  source $DIR/.env.${ENV}
+	source $DIR/.env.${ENV}
 fi
 cd $DIR
 
@@ -99,8 +99,8 @@ gw_nodeverify() {
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
 	IP=$(cat $VAR/IP)
 	ID=$(cat $VAR/ID)
-  APP_KEY=$(cat $VAR/APP_KEY)
-  PORTAL_URL=$(cat $VAR/PORTAL_URL)
+	APP_KEY=$(cat $VAR/APP_KEY)
+	PORTAL_URL=$(cat $VAR/PORTAL_URL)
 	if [ -n "$IP" ]; then
 		IP=$(curl -s ipv4.icanhazip.com)
 		n=$(grep -o "\." <<<"$IP" | wc -l)
@@ -112,8 +112,9 @@ gw_nodeverify() {
 
 	curl -s \
 		-H "Content-Type: application/json" \
-    -H "Authorization: $APP_KEY" \
-    "$PORTAL_URL/mbr/gateway/$ID/verify"
+		-H "Authorization: $APP_KEY" \
+		"$PORTAL_URL/mbr/gateway/$ID/verify" >$VAR/RAW
+	cat $VAR/RAW
 
 }
 
@@ -125,12 +126,12 @@ gw_register() {
 	NETWORK=$(cat $VAR/NETWORK)
 	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
 	ID=$(cat $VAR/ID)
-  APP_KEY=$(cat $VAR/APP_KEY)
-  PORTAL_URL=$(cat $VAR/PORTAL_URL)
+	APP_KEY=$(cat $VAR/APP_KEY)
+	PORTAL_URL=$(cat $VAR/PORTAL_URL)
 	curl -s \
 		-H "Content-Type: application/json" \
-    -H "Authorization: $APP_KEY" \
-    "$PORTAL_URL/mbr/gateway/$ID/register"
+		-H "Authorization: $APP_KEY" \
+		"$PORTAL_URL/mbr/gateway/$ID/register"
 
 }
 gw_unregister() {
@@ -146,8 +147,8 @@ gw_unregister() {
 	PORTAL_URL=$(cat $VAR/PORTAL_URL)
 	curl -s \
 		-H "Content-Type: application/json" \
-    -H "Authorization: $APP_KEY" \
-    "$PORTAL_URL/mbr/gateway/$ID/unregister"
+		-H "Authorization: $APP_KEY" \
+		"$PORTAL_URL/mbr/gateway/$ID/unregister"
 
 }
 gw_set() {
