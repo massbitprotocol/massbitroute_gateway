@@ -192,7 +192,7 @@ _update_network() {
 }
 _load_config() {
 	mkdir -p http.d
-	rm http.d/*
+	# rm http.d/*
 	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
