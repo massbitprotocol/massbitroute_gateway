@@ -11,3 +11,4 @@ nginx.conf
 etc/htpasswd
 /.env_raw
 /src/env.lua
+/http.d/
