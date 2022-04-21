@@ -214,7 +214,7 @@ _load_config() {
 
 	# mkdir -p http.d
 	# rm http.d/*
-	# $SITE_ROOT/mbr node nodeinfo
+	$SITE_ROOT/mbr node nodeinfo
 	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
