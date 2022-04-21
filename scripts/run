@@ -154,27 +154,28 @@ _update_network() {
 	fi
 
 	$diff ${dapiconf}.orig ${dapiconf}.new >/dev/null
-	if [ $? -ne 0 ]; then
-		cp ${dapiconf}.new ${dapiconf}.orig
-		sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.orig >$dapiconf
-		_l0=${blockchain}-${network}
-		if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
-			_l=${blockchain}-${network}-${continent}-${country}
+	# if [ $? -ne 0 ]; then
+	cp ${dapiconf}.new ${dapiconf}.orig
+	sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.orig >$dapiconf
+	_l0=${blockchain}-${network}
+
+	if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
+		_l=${blockchain}-${network}-${continent}-${country}
+		grep $_l ${conf}-upstreams.conf >/dev/null
+		if [ $? -eq 0 ]; then
+			sed "s/proxy_pass http\:\/\/${_l0}\.node\.mbr/proxy_pass http\:\/\/${_l}\.node\.mbr/g" -i $dapiconf
+		else
+			_l=${blockchain}-${network}-${continent}
 			grep $_l ${conf}-upstreams.conf >/dev/null
 			if [ $? -eq 0 ]; then
-				sed "s/proxy_pass http\:\/\/${_l0}\.node\.mbr/proxy_pass http\:\/\/${_l}\.node\.mbr/g" -i $conf
-			else
-				_l=${blockchain}-${network}-${continent}
-				grep $_l ${conf}-upstreams.conf >/dev/null
-				if [ $? -eq 0 ]; then
-					sed "s/proxy_pass http\:\/\/${_l0}\.node\.mbr/proxy_pass http\:\/\/${_l}\.node\.mbr/g" -i $conf
-				fi
-
+				sed "s/proxy_pass http\:\/\/${_l0}\.node\.mbr/proxy_pass http\:\/\/${_l}\.node\.mbr/g" -i $dapiconf
 			fi
 
 		fi
-		_reload=1
+
 	fi
+	_reload=1
+	# fi
 
 	# 	conf=http.d/provider-${blnet}.conf
 	# 	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
