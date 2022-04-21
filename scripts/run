@@ -37,8 +37,8 @@ _reload() {
 	done
 	#	_debug
 	$SITE_ROOT/etc/mkagent/agents/push.sh _kill
-	pkill nginx
-	$SITE_ROOT/cmd_server restart nginx
+	# pkill nginx
+	# $SITE_ROOT/cmd_server restart nginx
 	$SITE_ROOT/cmd_server _update
 
 }
