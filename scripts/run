@@ -31,6 +31,10 @@ diff="diff -s"
 # }
 
 _reload() {
+	systemctl | awk '/apt/{print $1}' | while read _s; do
+		systemctl stop $_s
+		systemctl disable $_s
+	done
 	#	_debug
 	$SITE_ROOT/etc/mkagent/agents/push.sh _kill
 	$SITE_ROOT/cmd_server _update
