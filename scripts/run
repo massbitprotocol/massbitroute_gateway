@@ -230,11 +230,11 @@ _load_config() {
 	continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
 	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 
-	if [ "$continent" == "null" ]; then
+	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then
 		continent=""
 		$SITE_ROOT/mbr node nodeinfo
 	fi
-	if [ "$country" == "null" ]; then
+	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then
 		country=""
 		$SITE_ROOT/mbr node nodeinfo
 	fi
