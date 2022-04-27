@@ -122,7 +122,7 @@ _update_network() {
 	blnet=${blockchain}-${network}
 
 	conf=http.d/gw-${blnet}
-	if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
+	# if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
 
 	# curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}.conf -o ${conf}.new >/dev/null
 	# if [ $? -ne 0 ]; then
@@ -140,6 +140,7 @@ _update_network() {
 		touch ${conf}-nodes.new
 	fi
 
+	if [ ! -f "${conf}-nodes.conf" ]; then touch ${conf}-nodes.orig; fi
 	$diff ${conf}-nodes.orig ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
 		cp ${conf}-nodes.new ${conf}-nodes.orig
@@ -151,7 +152,7 @@ _update_network() {
 	if [ $? -ne 0 ]; then
 		touch ${conf}-upstreams.new
 	fi
-
+	if [ ! -f "${conf}-upstreams.conf" ]; then touch ${conf}-upstreams.orig; fi
 	$diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
 	if [ $? -ne 0 ]; then
 		cp ${conf}-upstreams.new ${conf}-upstreams.orig
