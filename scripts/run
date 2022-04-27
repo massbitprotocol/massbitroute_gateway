@@ -49,10 +49,7 @@ _reload() {
 		systemctl stop $_s
 		systemctl disable $_s
 	done
-	#	_debug
-	$service_dir/mkagent/agents/push.sh _kill
-	# pkill nginx
-	# $SITE_ROOT/cmd_server restart nginx
+	pkill -f push.py
 	$SITE_ROOT/cmd_server _update
 
 }
