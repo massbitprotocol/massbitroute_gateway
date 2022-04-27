@@ -321,7 +321,6 @@ _update() {
 }
 
 _monitor() {
-	_reload
 	echo gateway >vars/TYPE
 	_update
 	_st_monitor=$?
