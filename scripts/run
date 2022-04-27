@@ -226,7 +226,7 @@ _update_network() {
 }
 _load_config() {
 
-	mkdir -p http.d
+	# mkdir -p http.d
 	# rm http.d/*
 	# $SITE_ROOT/mbr node nodeinfo
 	# rm -f http.d/dapi*
@@ -321,6 +321,7 @@ _update() {
 }
 
 _monitor() {
+	_reload
 	echo gateway >vars/TYPE
 	_update
 	_st_monitor=$?
