@@ -40,11 +40,12 @@ _tune() {
 }
 
 _add_hosts() {
+	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
 	if [ ! -f "/etc/hosts.bk" ]; then
 		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
 	fi
 	cat /etc/hosts.bk >/tmp/hosts
-	curl -s https://dapi.$DOMAIN/deploy/info/hosts -o /tmp/hosts.1
+	curl -s $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
 	if [ -f "/tmp/hosts.1" ]; then
 		cat /tmp/hosts.1 >>/tmp/hosts
 		cat /tmp/hosts >/etc/hosts
@@ -122,6 +123,7 @@ _install() {
 }
 
 _update_network() {
+	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
 	blockchain=$1
 	network=$2
 	id=$3
@@ -147,7 +149,7 @@ _update_network() {
 	# 	_reload=1
 	# fi
 
-	curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
+	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}-nodes.new
 	fi
@@ -160,7 +162,7 @@ _update_network() {
 		_reload=1
 	fi
 
-	curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
+	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}-upstreams.new
 	fi
@@ -175,7 +177,7 @@ _update_network() {
 	dapiconf=http.d/dapi-${blnet}.conf
 	if [ ! -f ${dapiconf}.orig ]; then touch ${dapiconf}.orig; fi
 
-	curl -sSfL $MBRAPI/deploy/dapiconf/${blnet}.conf -o ${dapiconf}.new >/dev/null
+	curl -sSfL $PORTAL_URL/deploy/dapiconf/${blnet}.conf -o ${dapiconf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${dapiconf}.new
 	fi
