@@ -39,11 +39,12 @@ _tune() {
 	sysctl -p
 }
 
-_add_hosts() {
+_add_host_file() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
 	if [ ! -f "/etc/hosts.bk" ]; then
 		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
 	fi
+	sed '/</d' /etc/hosts -i /etc/hosts.bk
 	cat /etc/hosts.bk >/tmp/hosts
 	curl -s $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
 	if [ -f "/tmp/hosts.1" ]; then
@@ -54,7 +55,7 @@ _add_hosts() {
 }
 
 _reload() {
-	_add_hosts
+	_add_host_file
 	if [ ! -L "/etc/letsencrypt" ]; then
 		rm -rf /etc/letsencrypt
 		ln -sf /massbit/massbitroute/app/src/sites/services/gateway/ssl /etc/letsencrypt
