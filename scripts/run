@@ -68,6 +68,8 @@ _reload() {
 	done
 	pkill -f push.py
 	$SITE_ROOT/cmd_server _update
+	$SITE_ROOT/cmd_server update
+	$SITE_ROOT/cmd_server start all
 
 }
 
