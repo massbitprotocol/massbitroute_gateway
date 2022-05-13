@@ -79,6 +79,9 @@ _reload() {
 	fi
 
 	_tune
+	if [ -f "/etc/logrotate.d/massbit" ]; then
+		logrotate -vf /etc/logrotate.d/massbit
+	fi
 	systemctl | awk '/apt/{print $1}' | while read _s; do
 		systemctl stop $_s
 		systemctl disable $_s
