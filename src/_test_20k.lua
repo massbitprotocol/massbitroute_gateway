@@ -7,7 +7,7 @@ local _json =
 md5:update(_json)
 local digest = md5:final()
 local _checksum = str.to_hex(digest)
-ngx.req.set_header("X-Mbr-Checksum", _checksum)
+ngx.header["X-Mbr-Checksum"] = _checksum
 ngx.status = 200
 ngx.say(_json)
 ngx.exit(ngx.HTTP_OK)
