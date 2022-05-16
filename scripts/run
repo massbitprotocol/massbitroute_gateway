@@ -221,7 +221,7 @@ _update_network() {
 		if [ $? -eq 0 ]; then
 			sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
 		else
-			_l="${blockchain}-${network}-${continent}\\."
+			_l="${blockchain}-${network}-${continent}-${country}-v1-v2\\."
 			grep $_l ${conf}-upstreams.conf >/dev/null
 			if [ $? -eq 0 ]; then
 				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
@@ -320,7 +320,7 @@ _load_config() {
 		if [ $? -eq 0 ]; then
 			sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
 		else
-			_l="${blockchain}-${network}-${continent}\\."
+			_l="${blockchain}-${network}-${continent}-${country}-v1-v2\\."
 			grep $_l ${conf}-upstreams.conf >/dev/null
 			if [ $? -eq 0 ]; then
 				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
