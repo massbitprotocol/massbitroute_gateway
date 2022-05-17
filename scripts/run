@@ -208,11 +208,10 @@ _update_network() {
 	$diff ${dapiconf}.orig ${dapiconf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		cp ${dapiconf}.new ${dapiconf}.orig
-		sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.orig >$dapiconf
 
 		_reload=1
 	fi
-
+	sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.new >$dapiconf
 	_l0="${blockchain}-${network}\\."
 
 	if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
