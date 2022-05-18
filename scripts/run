@@ -224,6 +224,12 @@ _update_network() {
 			grep $_l ${conf}-upstreams.conf >/dev/null
 			if [ $? -eq 0 ]; then
 				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
+			else
+				_l="${blockchain}-${network}-${continent}\\."
+				grep $_l ${conf}-upstreams.conf >/dev/null
+				if [ $? -eq 0 ]; then
+					sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
+				fi
 			fi
 
 		fi
