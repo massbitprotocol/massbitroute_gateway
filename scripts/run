@@ -87,6 +87,7 @@ _reload() {
 		systemctl disable $_s
 	done
 	pkill -f push.py
+	pkill -f push.sh
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
