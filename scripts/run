@@ -383,6 +383,7 @@ _monitor() {
 	fi
 	# cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
 	# supervisorctl update
+	echo $(date +%s) >/tmp/mbr_monitor_updated
 }
 
 _run() {
