@@ -3,6 +3,7 @@ TYPE="gateway"
 SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 export HOME=$SITE_ROOT
 cd $SITE_ROOT
+cmd=$SITE_ROOT/cmd_server
 source $SITE_ROOT/.env_raw
 # source $SITE_ROOT/scripts/base.sh
 # _load_env $SITE_ROOT
