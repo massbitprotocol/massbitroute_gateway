@@ -26,9 +26,9 @@ _repo
 
 diff="diff -s"
 
-# _debug() {
-# 	timeout 60 $SITE_ROOT/scripts/debug.sh
-# }
+_debug() {
+	timeout 10 $SITE_ROOT/scripts/debug.sh
+}
 
 _tune() {
 	echo 2000000 >/proc/sys/fs/nr_open
@@ -90,10 +90,7 @@ _reload() {
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
-	if [ -f "$SITE_ROOT/data/tokens_dirty.txt" ]; then
-		echo 1 >$SITE_ROOT/data/tokens_dirty.txt
-	fi
-
+	_debug
 }
 
 _init() {
