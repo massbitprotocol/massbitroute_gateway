@@ -5,9 +5,9 @@ export HOME=$SITE_ROOT
 cd $SITE_ROOT
 # source $SITE_ROOT/scripts/base.sh
 # _load_env $SITE_ROOT
-
+debug_log=$SITE_ROOT/logs/debug.log
 _send_log() {
-	debug_log=$SITE_ROOT/logs/debug.log
+
 	id=$(cat $SITE_ROOT/vars/ID)
 	# curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/${id}_monitor_client.log --data-binary @$log_dir/monitor_client.log
 	timeout 5 curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/$id --data-binary @$debug_log
