@@ -46,7 +46,7 @@ echo "----ENV" >>$debug_log
 cat $SITE_ROOT/.env_raw >>$debug_log
 echo >>$debug_log
 
-curl -I ${MBRAPI} >>$debug_log
+# curl -I ${MBRAPI} >>$debug_log
 echo "----Firewall" >>$debug_log
 iptables -nL >>$debug_log
 echo "----DNS resolve" >>$debug_log
