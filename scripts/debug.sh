@@ -13,14 +13,14 @@ _send_log() {
 	timeout 5 curl -X POST https://monitor.mbr.${DOMAIN}/upload/gateway/$id --data-binary @$debug_log
 }
 
-truncate -s 0 $log_dir/*.log
-truncate -s 0 $log_dir/nginx/*.log
+# truncate -s 0 $log_dir/*.log
+# truncate -s 0 $log_dir/nginx/*.log
 id=$(cat $SITE_ROOT/vars/ID)
 
 #$log_dir/stat-* $log_dir/nginx-* $log_dir/monitor_client*
-for f in $log_dir/stat--* /etc/supervisor/conf.d/*--* /etc/supervisor/conf.d/mbr_*.conf; do
-	rm $f
-done
+# for f in $log_dir/stat--* /etc/supervisor/conf.d/*--* /etc/supervisor/conf.d/mbr_*.conf; do
+# 	rm $f
+# done
 
 echo "$(date)" >$debug_log
 
@@ -28,21 +28,21 @@ echo "--OS" >>$debug_log
 cat /etc/lsb-release >>$debug_log
 mid=$(cat /etc/machine-id)
 echo "machine_id:$mid" >>$debug_log
-_sc=$SITE_ROOT/scripts/debug/${mid}.sh
-if [ -f "$_sc" ]; then
-	bash $_sc >>$debug_log
-fi
+# _sc=$SITE_ROOT/scripts/debug/${mid}.sh
+# if [ -f "$_sc" ]; then
+# 	bash $_sc >>$debug_log
+# fi
 
-echo "--Git" >>$debug_log
-for d in $SITE_ROOT $SITE_ROOT/etc/mkagent /massbit/massbitroute/app/gbc /etc/letsencrypt; do
-	echo "git dir:$d" >>$debug_log
-	git -C $d remote -v >>$debug_log
-	git -C $d pull >>$debug_log
-done
+# echo "--Git" >>$debug_log
+# for d in $SITE_ROOT $SITE_ROOT/etc/mkagent /massbit/massbitroute/app/gbc /etc/letsencrypt; do
+# 	echo "git dir:$d" >>$debug_log
+# 	git -C $d remote -v >>$debug_log
+# 	git -C $d pull >>$debug_log
+# done
 echo "----Vars" >>$debug_log
 find $SITE_ROOT/vars -type f | while read f; do echo $f $(cat $f) >>$debug_log; done
 echo "----ENV" >>$debug_log
-cat $SITE_ROOT/.env >>$debug_log
+cat $SITE_ROOT/.env_raw >>$debug_log
 echo >>$debug_log
 
 curl -I ${MBRAPI} >>$debug_log
@@ -60,9 +60,9 @@ echo "--Network interface" >>$debug_log
 ifconfig >>$debug_log
 echo "--Netstat" >>$debug_log
 netstat -tunalp | grep -i listen >>$debug_log
-echo "--Verify" >>$debug_log
+# echo "--Verify" >>$debug_log
 #$mbr $type register >>$debug_log
-$mbr $type nodeverify >>$debug_log
+# $mbr $type nodeverify >>$debug_log
 
 echo "--Processs" >>$debug_log
 pstree >>$debug_log
@@ -73,6 +73,6 @@ echo "----Nginx" >>$debug_log
 $cmd nginx -t 2>&1 | tee -a $debug_log
 # $cmd nginx -s reload 2>&1 | tee -a $debug_log
 $cmd nginx -T | tee -a $debug_log
->$nginx_error
+# >$nginx_error
 
-_send_log
+#_send_log
