@@ -12,6 +12,7 @@ cd $SITE_ROOT
 
 mbr_root=/massbit/massbitroute/app
 service_dir=$mbr_root/src/sites/services
+log_install=$SITE_ROOT/logs/install.log
 
 GIT_PUBLIC_URL="https://github.com"
 export MBR_ENV=${MBR_ENV:-dev}
@@ -140,10 +141,10 @@ _supervisor() {
 	supervisorctl update
 }
 _install() {
-	_init
-	_prepare
-	_install_repos
-	_supervisor
+	_init >>$log_install
+	_prepare >>$log_install
+	_install_repos >>$log_install
+	_supervisor >>$log_install
 }
 
 _update_network() {
