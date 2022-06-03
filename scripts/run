@@ -72,6 +72,7 @@ _add_host_file() {
 }
 
 _reload() {
+	$SITE_ROOT/mbr node nodeinfo
 	rm /tmp/test_speed_* /tmp/check_speed
 	_add_host_file
 	if [ ! -L "/etc/letsencrypt" ]; then
