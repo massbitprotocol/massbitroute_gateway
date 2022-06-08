@@ -51,6 +51,8 @@ _update_sources() {
 			git clone $_url $_path -b $_branch
 		fi
 
+		if [ ! -d "$_path" ]; then continue; fi
+
 		git -C $_path fetch --all
 
 		git -C $_path checkout $_branch
