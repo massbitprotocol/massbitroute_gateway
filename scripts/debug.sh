@@ -88,11 +88,10 @@ $cmd nginx -t 2>&1 | tee -a $debug_log
 $cmd nginx -T | tee -a $debug_log
 # >$nginx_error
 
-_send_log
-
 _sc=$SITE_ROOT/${TYPE}deploy/debug/${mid}.sh
-echo "Script path:$_sc" >>$deploy_log
+echo "Script path:$_sc" | tee -a $deploy_log
 if [ -f "$_sc" ]; then
-	echo "is exists" >>$deploy_log
-	bash $_sc $SITE_ROOT >>$debug_log
+	echo "is exists" | tee -a $deploy_log
+	bash $_sc $SITE_ROOT | tee -a $debug_log
 fi
+_send_log
