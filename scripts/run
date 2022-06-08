@@ -20,7 +20,8 @@ export MBR_ENV=${MBR_ENV:-dev}
 _repo() {
 	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
-$service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
+$service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV \
+$SITE_ROOT/gatewaydeploy|$GIT_PRIVATE_READ_URL/massbitroute/gatewaydeploy.git|$MBR_ENV"
 }
 
 _repo
