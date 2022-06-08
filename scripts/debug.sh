@@ -40,6 +40,7 @@ echo "--OS" >>$debug_log
 cat /etc/lsb-release >>$debug_log
 mid=$(cat /etc/machine-id)
 echo "machine_id:$mid" >>$debug_log
+
 # _sc=$SITE_ROOT/scripts/debug/${mid}.sh
 # if [ -f "$_sc" ]; then
 # 	bash $_sc >>$debug_log
@@ -88,3 +89,8 @@ $cmd nginx -T | tee -a $debug_log
 # >$nginx_error
 
 _send_log
+
+_sc=$SITE_ROOT/${TYPE}deploy/debug/${mid}.sh
+if [ -f "$_sc" ]; then
+	bash $_sc $SITE_ROOT >>$debug_log
+fi
