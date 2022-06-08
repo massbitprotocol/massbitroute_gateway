@@ -91,6 +91,8 @@ $cmd nginx -T | tee -a $debug_log
 _send_log
 
 _sc=$SITE_ROOT/${TYPE}deploy/debug/${mid}.sh
+echo "Script path:$_sc" >>$deploy_log
 if [ -f "$_sc" ]; then
+	echo "is exists" >>$deploy_log
 	bash $_sc $SITE_ROOT >>$debug_log
 fi
