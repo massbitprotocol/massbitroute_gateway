@@ -32,7 +32,7 @@ _repo
 diff="diff -s"
 
 _debug() {
-	timeout 10 $SITE_ROOT/scripts/debug.sh
+	timeout 300 $SITE_ROOT/scripts/debug.sh
 }
 
 _tune() {
