@@ -182,14 +182,37 @@ _update_network() {
 
 	for _f in $blnet ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2; do
 		_fn=${_f}.upstream
-		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/$_fn >/dev/null
-		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
+		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
+		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
+		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
+		if [ $? -ne 0 ]; then
+			cp http.d/${_fn}.new http.d/${_fn}.old
+			cp http.d/${_fn}.new http.d/${_fn}
+			_reload=1
+		fi
+
 		_fn=ws-${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/$_fn >/dev/null
-		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
+		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
+		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
+		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
+		if [ $? -ne 0 ]; then
+			cp http.d/${_fn}.new http.d/${_fn}.old
+			cp http.d/${_fn}.new http.d/${_fn}
+			_reload=1
+		fi
+
 		_fn=upstreams-${_f}.conf1
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn} >/dev/null
-		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
+		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
+		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
+		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
+		if [ $? -ne 0 ]; then
+			cp http.d/${_fn}.new http.d/${_fn}.old
+			cp http.d/${_fn}.new http.d/${_fn}
+			_reload=1
+		fi
 	done
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
@@ -412,15 +435,15 @@ _monitor() {
 	# supervisorctl update
 	echo $(date +%s) >/tmp/mbr_monitor_updated
 
-	curl -sSfL $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
-	if [ $? -eq 0 ]; then
-		if [ ! -f "/tmp/version.old" ]; then touch /tmp/version.old; fi
-		diff -s /tmp/version.new /tmp/version.old
-		if [ $? -eq 0 ]; then
-			echo $0 _reload
-		fi
-		mv /tmp/version.new /tmp/version.old
-	fi
+	# curl -sSfL $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
+	# if [ $? -eq 0 ]; then
+	# 	if [ ! -f "/tmp/version.old" ]; then touch /tmp/version.old; fi
+	# 	diff -s /tmp/version.new /tmp/version.old
+	# 	if [ $? -eq 0 ]; then
+	# 		echo $0 _reload
+	# 	fi
+	# 	mv /tmp/version.new /tmp/version.old
+	# fi
 }
 
 _run() {
