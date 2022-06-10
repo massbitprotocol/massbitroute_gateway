@@ -189,6 +189,7 @@ _update_network() {
 		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
 		_fn=upstreams-${_f}.conf1
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn} >/dev/null
+		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
 	done
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
@@ -406,9 +407,20 @@ _monitor() {
 	if [ $_st_monitor -ne 0 ]; then
 		$0 _reload
 	fi
+
 	# cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
 	# supervisorctl update
 	echo $(date +%s) >/tmp/mbr_monitor_updated
+
+	curl -sSfL $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
+	if [ $? -eq 0 ]; then
+		if [ ! -f "/tmp/version.old" ]; then touch /tmp/version.old; fi
+		diff -s /tmp/version.new /tmp/version.old
+		if [ $? -eq 0 ]; then
+			echo $0 _reload
+		fi
+		mv /tmp/version.new /tmp/version.old
+	fi
 }
 
 _run() {
