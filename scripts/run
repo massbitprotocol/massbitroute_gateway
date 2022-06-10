@@ -97,7 +97,7 @@ _reload() {
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
-	_debug
+	#_debug
 }
 
 _init() {
