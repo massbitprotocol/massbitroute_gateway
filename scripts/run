@@ -164,6 +164,7 @@ _update_network() {
 	if [ -z "$network" ]; then return $_reload; fi
 	if [ -z "$id" ]; then return $_reload; fi
 	blnet=${blockchain}-${network}
+	geo=${continent}-${country}
 
 	conf=http.d/gw-${blnet}
 	# if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
@@ -178,6 +179,13 @@ _update_network() {
 	# 	cp ${conf}.new ${conf}.orig
 	# 	_reload=1
 	# fi
+
+	for _f in $blnet ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2; do
+		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_f}.upstream -o http.d/$_f >/dev/null
+	done
+	for _f in $blnet ${blnet}-${geo}-v1-v2; do
+		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/upstreams-${_f}.conf1 -o http.d/upstreams-${_f}.conf1 >/dev/null
+	done
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
