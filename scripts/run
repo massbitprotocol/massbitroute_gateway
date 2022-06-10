@@ -193,7 +193,7 @@ _update_network() {
 		fi
 
 		_fn=ws-${_f}.upstream
-		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/$_fn >/dev/null
+		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
@@ -204,7 +204,7 @@ _update_network() {
 		fi
 
 		_fn=upstreams-${_f}.conf1
-		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn} >/dev/null
+		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
