@@ -183,8 +183,10 @@ _update_network() {
 	for _f in $blnet ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2; do
 		_fn=${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/$_fn >/dev/null
+		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
 		_fn=ws-${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/$_fn >/dev/null
+		if [ ! -f "http.d/$_fn" ]; then touch http.d/$_fn; fi
 		_fn=upstreams-${_f}.conf1
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn} >/dev/null
 	done
