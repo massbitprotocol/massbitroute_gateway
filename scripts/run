@@ -215,7 +215,7 @@ _update_network() {
 			_reload=1
 		fi
 	done
-	cat http.d/upstreams-*.conf1 >${conf}-upstreams.conf2
+	cat http.d/upstreams-*.conf1.new >${conf}-upstreams.conf2
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
