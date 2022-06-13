@@ -173,7 +173,7 @@ _optimize_upstream_file() {
 	rm $_node_ids
 }
 _optimize_upstream_geo() {
-	node_scores=$1
+	_node_scores=$1
 	_upstream_country=$(mktemp)
 	_upstream_continent=$(mktemp)
 	_upstream_other=$(mktemp)
