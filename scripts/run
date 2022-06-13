@@ -181,6 +181,7 @@ _update_network() {
 	# fi
 
 	rm http.d/upstreams-*.conf1
+	>${conf}-upstreams.conf2
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
 		_fn=${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
@@ -214,8 +215,10 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
 		fi
+		cat http.d/${_fn}.new >>${conf}-upstreams.conf2
+		echo >>${conf}-upstreams.conf2
 	done
-	cat http.d/upstreams-*.conf1.new >${conf}-upstreams.conf2
+	# cat http.d/upstreams-*.conf1.new >${conf}-upstreams.conf2
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
