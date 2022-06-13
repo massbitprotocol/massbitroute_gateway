@@ -181,7 +181,7 @@ _update_network() {
 	# fi
 
 	rm http.d/upstreams-*.conf1
-	>${conf}-upstreams.conf2
+	>${conf}-upstreams.conf
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
 		_fn=${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
@@ -215,8 +215,8 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
 		fi
-		cat http.d/${_fn}.new >>${conf}-upstreams.conf2
-		echo >>${conf}-upstreams.conf2
+		cat http.d/${_fn}.new >>${conf}-upstreams.conf
+		echo >>${conf}-upstreams.conf
 	done
 	# cat http.d/upstreams-*.conf1.new >${conf}-upstreams.conf2
 
@@ -233,17 +233,17 @@ _update_network() {
 		_reload=1
 	fi
 
-	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
-	if [ $? -ne 0 ]; then
-		touch ${conf}-upstreams.new
-	fi
-	if [ ! -f "${conf}-upstreams.conf" ]; then touch ${conf}-upstreams.orig; fi
-	$diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
-	if [ $? -ne 0 ]; then
-		cp ${conf}-upstreams.new ${conf}-upstreams.orig
-		cp ${conf}-upstreams.new ${conf}-upstreams.conf
-		_reload=1
-	fi
+	# curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
+	# if [ $? -ne 0 ]; then
+	# 	touch ${conf}-upstreams.new
+	# fi
+	# if [ ! -f "${conf}-upstreams.conf" ]; then touch ${conf}-upstreams.orig; fi
+	# $diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
+	# if [ $? -ne 0 ]; then
+	# 	cp ${conf}-upstreams.new ${conf}-upstreams.orig
+	# 	cp ${conf}-upstreams.new ${conf}-upstreams.conf
+	# 	_reload=1
+	# fi
 
 	dapiconf=http.d/dapi-${blnet}.conf
 	if [ ! -f ${dapiconf}.orig ]; then touch ${dapiconf}.orig; fi
