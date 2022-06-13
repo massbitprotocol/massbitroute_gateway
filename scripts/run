@@ -184,6 +184,9 @@ _optimize_upstream() {
 	timeout 3 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_monitor
 	_optimize_upstream_file http.d/${blockchain}-${network}.upstream $node_monitor $node_scores
 	_optimize_upstream_file http.d/${blockchain}-${network}-${continent}.upstream $node_monitor
+	_optimize_upstream_file http.d/${blockchain}-${network}-${continent}-${country}.upstream $node_monitor
+	_optimize_upstream_file http.d/${blockchain}-${network}-${continent}-${country}-v1.upstream $node_monitor
+	_optimize_upstream_file http.d/${blockchain}-${network}-${continent}-${country}-v1-v2.upstream $node_monitor
 }
 _update_network() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
