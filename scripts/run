@@ -152,6 +152,18 @@ _install() {
 	_supervisor >>$log_install
 }
 
+_optimize_upstream_file() {
+	_fstream=$1
+	node_monitor=$2
+	if [ ! -f "$_fstream" ]; then return; fi
+	node_ids=$(mktemp)
+	node_scores=$(mktemp)
+	awk '{gsub(/unix:\/tmp\//,"",$2);gsub(/.sock/,"",$2);print $2;}' $_fstream | sort >$node_ids
+	join -j 1 -o 1.1,2.2 $node_ids $node_monitor | sort -k2 -nr >$node_scores
+	cp $_fstream ${_fstream}.bk
+	awk '{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $node_scores >$_fstream
+	rm $node_ids $node_scores
+}
 _optimize_upstream() {
 	blockchain=$1
 	network=$2
@@ -159,14 +171,10 @@ _optimize_upstream() {
 	continent=$4
 	country=$5
 
-	if [ ! -f "http.d/${blockchain}-${network}.upstream" ]; then return; fi
-	node_ids=$(mktemp)
-	node_tmp=$(mktemp)
-	node_scores=/tmp/node_scores
-	awk '{gsub(/unix\:\/tmp\//,"",$2);gsub(/.sock/,"",$2);print $2;}' http.d/${blockchain}-${network}.upstream | sort >$node_ids
-	timeout 3 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_tmp
-	join -j 1 -o 1.1,2.2 $node_ids $node_tmp | sort -k2 -nr >$node_scores
-	rm $node_ids $node_tmp
+	node_monitor=/tmp/node_monitor
+	timeout 3 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_monitor
+	_optimize_upstream_file http.d/${blockchain}-${network}.upstream $node_monitor
+	_optimize_upstream_file http.d/${blockchain}-${network}-${continent}.upstream $node_monitor
 }
 _update_network() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
