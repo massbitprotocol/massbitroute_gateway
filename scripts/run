@@ -180,7 +180,7 @@ _update_network() {
 	# 	_reload=1
 	# fi
 
-	for _f in $blnet ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2; do
+	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2; do
 		_fn=${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
