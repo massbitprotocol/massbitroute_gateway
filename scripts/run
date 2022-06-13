@@ -414,7 +414,7 @@ _update_network() {
 _load_config() {
 
 	# mkdir -p http.d
-	rm http.d/*
+	# rm http.d/*
 	# $SITE_ROOT/mbr node nodeinfo
 	# rm -f http.d/dapi*
 	is_loading=0
