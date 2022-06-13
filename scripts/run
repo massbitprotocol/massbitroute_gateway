@@ -440,6 +440,8 @@ _load_config() {
 	fi
 
 	_update_network $blockchain $network $id $continent $country
+	_optimize_upstream $blockchain $network $id $continent $country
+
 	st=$?
 	echo $st
 	if [ $st -ne 0 ]; then
