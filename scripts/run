@@ -152,6 +152,104 @@ _install() {
 	_supervisor >>$log_install
 }
 
+_optimize_upstream_file() {
+	_fstream=$1
+	_node_monitor=$2
+	_node_scores1=$3
+	if [ ! -f "$_fstream" ]; then return; fi
+	_node_ids=$(mktemp)
+	if [ -z "$_node_scores1" ]; then
+		_node_scores=$(mktemp)
+	else
+		_node_scores=$_node_scores1
+	fi
+	awk '{gsub(/unix:\/tmp\//,"",$2);gsub(/.sock/,"",$2);print $2;}' $_fstream | sort >$_node_ids
+	join -j 1 -o 1.1,2.2 $_node_ids $_node_monitor | sort -k2 -nr >$_node_scores
+	cp $_fstream ${_fstream}.bk
+	awk '{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_fstream
+	if [ -z "$_node_scores1" ]; then
+		rm $_node_scores
+	fi
+	rm $_node_ids
+}
+_optimize_upstream_geo() {
+	_node_scores=$1
+	_geo=$2
+	_upstream_country=$(mktemp)
+	_upstream_continent=$(mktemp)
+	_upstream_other=$(mktemp)
+	awk '$2 > 100000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_country
+	awk '$2 <= 100000 && $2 > 10000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_continent
+	awk '$2 <= 10000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_other
+
+	_upstream_country_n=$(wc -l $_upstream_country | cut -d' ' -f1)
+	_upstream_continent_n=$(wc -l $_upstream_continent | cut -d' ' -f1)
+	_upstream_other_n=$(wc -l $_upstream_other | cut -d' ' -f1)
+
+	if [ $_upstream_country_n -ge 1 ]; then
+		_fn=http.d/${_geo}.upstream
+		if [ -f "$_fn" ]; then
+			cp $_fn ${_fn}.bk1
+			cp $_upstream_country $_fn
+		fi
+	fi
+
+	if [ $_upstream_continent_n -ge 1 ]; then
+		_fn=http.d/${_geo}-v1-v2.upstream
+		if [ -f "$_fn" ]; then
+			cp $_fn ${_fn}.bk1
+			cp $_upstream_continent $_fn
+		fi
+	fi
+	if [ $_upstream_other_n -ge 1 ]; then
+		_fn=http.d/${_geo}-v1.upstream
+		if [ -f "$_fn" ]; then
+			cp $_fn ${_fn}.bk1
+			cp $_upstream_other $_fn
+		fi
+	fi
+
+	echo "Upstream country"
+	cat $_upstream_country
+
+	echo "Upstream continent"
+	cat $_upstream_continent
+
+	echo "Upstream other"
+	cat $_upstream_other
+
+	rm $_upstream_continent $_upstream_country $_upstream_other
+
+}
+_optimize_upstream() {
+	blockchain=$1
+	network=$2
+	id=$3
+	continent=$4
+	country=$5
+	_reload=0
+	if [ -z "$continent" ]; then return $_reload; fi
+	if [ -z "$country" ]; then return $_reload; fi
+	if [ -z "$blockchain" ]; then return $_reload; fi
+	if [ -z "$network" ]; then return $_reload; fi
+	if [ -z "$id" ]; then return $_reload; fi
+
+	node_monitor=$SITE_ROOT/logs/node_monitor
+	node_scores=$SITE_ROOT/logs/node_scores
+	timeout 3 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_monitor
+	if [ $? -ne 0 ]; then return; fi
+	_tmp="$(cat $node_monitor)"
+	if [ -z "$_tmp" ]; then return; fi
+	_geo=${blockchain}-${network}-${continent}-${country}
+	_optimize_upstream_file http.d/${blockchain}-${network}.upstream $node_monitor $node_scores
+	_optimize_upstream_file http.d/${blockchain}-${network}-${continent}.upstream $node_monitor
+	_optimize_upstream_file http.d/${_geo}.upstream $node_monitor
+	_optimize_upstream_file http.d/${_geo}-v1.upstream $node_monitor
+	_optimize_upstream_file http.d/${_geo}-v1-v2.upstream $node_monitor
+
+	_optimize_upstream_geo $node_scores $_geo
+	return $_reload
+}
 _update_network() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
 	blockchain=$1
@@ -160,6 +258,8 @@ _update_network() {
 	continent=$4
 	country=$5
 	_reload=0
+	if [ -z "$continent" ]; then return $_reload; fi
+	if [ -z "$country" ]; then return $_reload; fi
 	if [ -z "$blockchain" ]; then return $_reload; fi
 	if [ -z "$network" ]; then return $_reload; fi
 	if [ -z "$id" ]; then return $_reload; fi
@@ -180,7 +280,9 @@ _update_network() {
 	# 	_reload=1
 	# fi
 
-	for _f in $blnet ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2; do
+	rm http.d/upstreams-*.conf1
+	>${conf}-upstreams.conf
+	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
 		_fn=${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
@@ -213,7 +315,10 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
 		fi
+		cat http.d/${_fn}.new >>${conf}-upstreams.conf
+		echo >>${conf}-upstreams.conf
 	done
+	# cat http.d/upstreams-*.conf1.new >${conf}-upstreams.conf2
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
@@ -228,17 +333,17 @@ _update_network() {
 		_reload=1
 	fi
 
-	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
-	if [ $? -ne 0 ]; then
-		touch ${conf}-upstreams.new
-	fi
-	if [ ! -f "${conf}-upstreams.conf" ]; then touch ${conf}-upstreams.orig; fi
-	$diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
-	if [ $? -ne 0 ]; then
-		cp ${conf}-upstreams.new ${conf}-upstreams.orig
-		cp ${conf}-upstreams.new ${conf}-upstreams.conf
-		_reload=1
-	fi
+	# curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
+	# if [ $? -ne 0 ]; then
+	# 	touch ${conf}-upstreams.new
+	# fi
+	# if [ ! -f "${conf}-upstreams.conf" ]; then touch ${conf}-upstreams.orig; fi
+	# $diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
+	# if [ $? -ne 0 ]; then
+	# 	cp ${conf}-upstreams.new ${conf}-upstreams.orig
+	# 	cp ${conf}-upstreams.new ${conf}-upstreams.conf
+	# 	_reload=1
+	# fi
 
 	dapiconf=http.d/dapi-${blnet}.conf
 	if [ ! -f ${dapiconf}.orig ]; then touch ${dapiconf}.orig; fi
@@ -337,13 +442,22 @@ _load_config() {
 	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then
 		continent=""
 		$SITE_ROOT/mbr node nodeinfo
+		continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+		country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+
 	fi
 	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then
 		country=""
 		$SITE_ROOT/mbr node nodeinfo
+		continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+		country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 	fi
 
 	_update_network $blockchain $network $id $continent $country
+	# if [ "$id" == "7bc87cee-1425-4bfd-8f24-ba8f25ee5e2e"]; then
+	_optimize_upstream $blockchain $network $id $continent $country
+	# fi
+
 	st=$?
 	echo $st
 	if [ $st -ne 0 ]; then
