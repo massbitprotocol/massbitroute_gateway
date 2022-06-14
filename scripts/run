@@ -294,6 +294,7 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
 		fi
+		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
 		_fn=ws-${_f}.upstream
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
@@ -305,6 +306,7 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
 		fi
+		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
 		_fn=upstreams-${_f}.conf1
 		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
@@ -316,6 +318,7 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
 		fi
+		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 		cat http.d/${_fn}.new >>${conf}-upstreams.conf.bk
 		echo >>${conf}-upstreams.conf.bk
 	done
