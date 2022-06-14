@@ -227,6 +227,12 @@ _optimize_upstream() {
 	id=$3
 	continent=$4
 	country=$5
+	_reload=0
+	if [ -z "$continent" ]; then return $_reload; fi
+	if [ -z "$country" ]; then return $_reload; fi
+	if [ -z "$blockchain" ]; then return $_reload; fi
+	if [ -z "$network" ]; then return $_reload; fi
+	if [ -z "$id" ]; then return $_reload; fi
 
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
@@ -242,6 +248,7 @@ _optimize_upstream() {
 	_optimize_upstream_file http.d/${_geo}-v1-v2.upstream $node_monitor
 
 	_optimize_upstream_geo $node_scores $_geo
+	return $_reload
 }
 _update_network() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
@@ -251,6 +258,8 @@ _update_network() {
 	continent=$4
 	country=$5
 	_reload=0
+	if [ -z "$continent" ]; then return $_reload; fi
+	if [ -z "$country" ]; then return $_reload; fi
 	if [ -z "$blockchain" ]; then return $_reload; fi
 	if [ -z "$network" ]; then return $_reload; fi
 	if [ -z "$id" ]; then return $_reload; fi
