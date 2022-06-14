@@ -543,6 +543,7 @@ _update() {
 }
 
 _monitor() {
+	echo keiko >/tmp/env
 	echo gateway >vars/TYPE
 	_update
 	_st_monitor=$?
