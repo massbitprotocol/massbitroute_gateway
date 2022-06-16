@@ -1,11 +1,14 @@
 #!/bin/bash
 
-export DOMAIN=massbitroute.net
+ROOT=$(realpath $(dirname $(realpath $0))/../..)
+source $ROOT/.env_raw
+
 export RUST_LOG=debug
-export SCHEDULER_ENDPOINT=http://127.0.0.1:3031
-export WORKER_ID=7c7da61c-aec7-45b1-9e32-7436d4721ce0
-export WORKER_ENDPOINT=http://192.168.1.34:4040/job_handle
+export SCHEDULER_ENDPOINT=https://scheduler.fisherman.$DOMAIN
+export WORKER_ID=$(cat $ROOT/vars/ID)
+export WORKER_IP=$(cat $ROOT/vars/IP)
+export WORKER_ENDPOINT=https://$WORKER_ID.gw.mbr.$DOMAIN/__worker
 export WORKER_SERVICE_ENDPOINT=0.0.0.0:4040
 export BENCHMARK_WRK_PATH=benchmark
 
-./fisherman
+$ROOT/service/fisherman/fisherman
