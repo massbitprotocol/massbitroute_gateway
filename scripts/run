@@ -32,7 +32,7 @@ _repo
 diff="diff -s"
 
 _debug() {
-	timeout 300 $SITE_ROOT/scripts/debug.sh
+	timeout 30 $SITE_ROOT/scripts/debug.sh
 }
 
 _tune() {
@@ -237,7 +237,7 @@ _optimize_upstream() {
 
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
-	timeout 3 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_monitor
+	timeout 30 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_monitor
 	if [ $? -ne 0 ]; then return; fi
 	_tmp="$(cat $node_monitor)"
 	if [ -z "$_tmp" ]; then return; fi
@@ -285,7 +285,7 @@ _update_network() {
 	>${conf}-upstreams.conf.bk
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
 		_fn=${_f}.upstream
-		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
@@ -297,7 +297,7 @@ _update_network() {
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
 		_fn=ws-${_f}.upstream
-		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
@@ -309,7 +309,7 @@ _update_network() {
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
 		_fn=upstreams-${_f}.conf1
-		timeout 3 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
