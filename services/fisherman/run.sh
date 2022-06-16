@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ROOT=$(realpath $(dirname $(realpath $0))/../..)
+VERSION=
 source $ROOT/.env_raw
 
 export RUST_LOG=debug
@@ -11,4 +12,4 @@ export WORKER_ENDPOINT=https://$WORKER_ID.gw.mbr.$DOMAIN/__worker
 export WORKER_SERVICE_ENDPOINT=0.0.0.0:4040
 export BENCHMARK_WRK_PATH=benchmark
 
-$ROOT/service/fisherman/fisherman
+$ROOT/services/fisherman/fisherman$VERSION
