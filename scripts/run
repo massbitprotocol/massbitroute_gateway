@@ -76,7 +76,7 @@ _add_host_file() {
 }
 
 _reload() {
-	rm $SITE_ROOT/logs/access/*
+	# rm $SITE_ROOT/logs/access/*
 	$SITE_ROOT/mbr node nodeinfo
 	rm /tmp/test_speed_* /tmp/check_speed
 	_add_host_file
