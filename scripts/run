@@ -351,6 +351,8 @@ _update_network() {
 		cp ${conf}-nodes.new ${conf}-nodes.orig
 		cp ${conf}-nodes.new ${conf}-nodes.conf
 		_reload=1
+	else
+		cp ${conf}-nodes.new ${conf}-nodes.conf
 	fi
 
 	# curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
