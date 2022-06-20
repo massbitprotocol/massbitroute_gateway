@@ -302,6 +302,8 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}.old
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
+		else
+			cp http.d/${_fn}.new http.d/${_fn}
 		fi
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
@@ -314,6 +316,8 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}.old
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
+		else
+			cp http.d/${_fn}.new http.d/${_fn}
 		fi
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
@@ -326,6 +330,8 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}.old
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
+		else
+			cp http.d/${_fn}.new http.d/${_fn}
 		fi
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 		cat http.d/${_fn}.new >>${conf}-upstreams.conf.bk
