@@ -28,7 +28,7 @@ redirect_stderr=true
 stopasgroup=true
 killasgroup=true
 stopsignal=INT
-stdout_logfile=_SITE_ROOT_/../mkagent/logs/fisherman.log
+stdout_logfile=_SITE_ROOT_/logs/fisherman.log
 ]]
 }
 return _config
