@@ -547,7 +547,7 @@ _load_config() {
 
 	_update_network $blockchain $network $id $continent $country
 	# if [ "$id" == "7bc87cee-1425-4bfd-8f24-ba8f25ee5e2e"]; then
-	#	_optimize_upstream $blockchain $network $id $continent $country
+	_optimize_upstream $blockchain $network $id $continent $country
 	# fi
 
 	st=$?
