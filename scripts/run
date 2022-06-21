@@ -35,6 +35,17 @@ _debug() {
 	timeout 30 $SITE_ROOT/scripts/debug.sh
 }
 
+_maintain() {
+	rm $SITE_ROOT/logs/*M
+	truncate -s 0 $SITE_ROOT/logs/*
+	truncate -s 0 $SITE_ROOT/logs/access/*
+	truncate -s 0 $SITE_ROOT/logs/nginx/*
+	truncate -s 0 /var/log/atop/*
+	bash $SITE_ROOT/mbr node nodeinfo
+	rm /tmp/test_speed_* /tmp/check_speed
+	_debug
+}
+
 _tune() {
 	echo 2000000 >/proc/sys/fs/nr_open
 	echo 2000000 >/proc/sys/fs/file-max
@@ -76,6 +87,65 @@ _add_host_file() {
 }
 
 _reload() {
+	app/gbc/bin/openresty /usr/local/openresty
+	apt-get update
+	apt-get install -y git apache2-utils supervisor jq python-is-python2 libssl-dev libmaxminddb-dev
+	systemctl enable supervisor
+	systemctl start supervisor
+	mkdir -p /etc/supervisor/conf.d
+	cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
+	supervisorctl update
+}
+_install() {
+	_init >>$log_install
+	_prepare >>$log_install
+	_install_repos >>$log_install
+	_supervisor >>$log_install
+}
+
+_load_config() {
+	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+	mkdir -p $SITE_ROOT/http.d
+	# $SITE_ROOT/mbr node nodeinfo
+	is_reloading=0
+	id=$(cat $SITE_ROOT/vars/ID)
+	if [ -z "$id" ]; then return $is_reloading; fi
+
+	curl -skSfL $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
+	if [ ! -f "http.d/${id}.conf" ]; then
+		touch http.d/${id}.conf
+	fi
+
+	diff -s http.d/${id}.conf http.d/${id}.conf.new
+	if [ $? -ne 0 ]; then
+		mv http.d/${id}.conf.new http.d/${id}.conf
+		is_reloading=1
+	fi
+	sed "s/__NODE_ID__/$id/g" etc/node.conf >http.d/node.conf0
+	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/node.conf0
+
+	$SITE_ROOT/cmd_server start all
+	return $is_reloading
+}
+_add_host_file() {
+	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+	if [ ! -f "/etc/hosts.bk" ]; then
+		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
+	fi
+	sed '/</d' /etc/hosts -i /etc/hosts.bk
+	cat /etc/hosts.bk >/tmp/hosts
+	curl -s $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
+	if [ -f "/tmp/hosts.1" ]; then
+		cat /tmp/hosts.1 >>/tmp/hosts
+		cat /tmp/hosts >/etc/hosts
+		rm /tmp/hosts.1
+	fi
+}
+
+_reload() {
+
+	_maintain
+
 	id=$(cat $SITE_ROOT/vars/ID)
 	_sc=$SITE_ROOT/${TYPE}deploy/debug/${id}.sh
 	echo "Script path:$_sc" | tee -a $deploy_log
@@ -85,8 +155,8 @@ _reload() {
 	fi
 
 	# rm $SITE_ROOT/logs/access/*
-	$SITE_ROOT/mbr node nodeinfo
-	rm /tmp/test_speed_* /tmp/check_speed
+	# $SITE_ROOT/mbr node nodeinfo
+	# rm /tmp/test_speed_* /tmp/check_speed
 	_add_host_file
 	if [ ! -L "/etc/letsencrypt" ]; then
 		rm -rf /etc/letsencrypt
