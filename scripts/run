@@ -17,6 +17,7 @@ debug_log=$SITE_ROOT/logs/debug.log
 GIT_PUBLIC_URL="https://github.com"
 export MBR_ENV=${MBR_ENV:-dev}
 
+user_id=$(cat $SITE_ROOT/vars/USER_ID)
 _repo() {
 	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
@@ -452,6 +453,7 @@ _update_network() {
 		_reload=1
 	fi
 	sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.new >$dapiconf
+	sed "s/__USER_ID__/$user_id/g" -i $dapiconf
 	_l0="${blockchain}-${network}\\."
 
 	if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
@@ -520,6 +522,7 @@ _load_config() {
 	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
+
 	if [ -z "$id" ]; then return $is_loading; fi
 
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
@@ -557,11 +560,13 @@ _load_config() {
 	fi
 
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
+	sed "s/__USER_ID__/$user_id/g" -i http.d/gateway.conf0
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
 	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
 	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
 
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
+	sed "s/__USER_ID__/$user_id/g" -i http.d/gateway.conf9
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
 	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
 	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
