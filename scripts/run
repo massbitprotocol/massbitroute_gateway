@@ -146,6 +146,13 @@ _add_host_file() {
 
 _reload() {
 
+	_geo_dir=$SITE_ROOT/data/geoip
+	mkdir -p $_geo_dir
+
+	if [ ! -f "$_geo_dir/GeoIP2-City.mmdb" ]; then
+		curl -sSfL https://portal.$DOMAIN/deploy/info/geoip/GeoIP2-City.mmdb -o $_geo_dir/GeoIP2-City.mmdb
+	fi
+
 	_maintain
 
 	id=$(cat $SITE_ROOT/vars/ID)
