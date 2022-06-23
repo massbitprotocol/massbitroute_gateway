@@ -146,12 +146,19 @@ _add_host_file() {
 
 _reload() {
 
-	_geo_dir=$SITE_ROOT/data/geoip
-	mkdir -p $_geo_dir
-
-	if [ ! -f "$_geo_dir/GeoIP2-City.mmdb" ]; then
-		curl -sSfL https://portal.$DOMAIN/deploy/info/geoip/GeoIP2-City.mmdb -o $_geo_dir/GeoIP2-City.mmdb
+	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
+		mkdir -p $SITE_ROOT/data/geoip
+		apt update
+		apt-get install -y xz-utils
+		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 	fi
+
+	# _geo_dir=$SITE_ROOT/data/geoip
+	# mkdir -p $_geo_dir
+
+	# if [ ! -f "$_geo_dir/GeoIP2-City.mmdb" ]; then
+	# 	curl -sSfL https://portal.$DOMAIN/deploy/info/geoip/GeoIP2-City.mmdb -o $_geo_dir/GeoIP2-City.mmdb
+	# fi
 
 	_maintain
 
@@ -208,6 +215,12 @@ _prepare() {
 
 	mkdir -p $SITE_ROOT/logs/nginx $SITE_ROOT/logs/access $SITE_ROOT/logs/error $SITE_ROOT/db $SITE_ROOT/cache $SITE_ROOT/cache_gateway $SITE_ROOT/tmp $SITE_ROOT/http.d
 	# rm -rf $SITE_ROOT/tmp/*
+
+	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
+		apt update
+		apt-get install -y xz-utils
+		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
+	fi
 
 }
 _install_repos() {
