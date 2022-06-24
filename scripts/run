@@ -209,6 +209,7 @@ _reload() {
 	chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
 	nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
+	msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
 	st=$?
 	echo $st nginx_check - "$msg" >/tmp/nginx_check
 	grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
