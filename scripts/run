@@ -420,6 +420,9 @@ _update_network() {
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
 		if [ $? -ne 0 ]; then
+			if [ $_nstream -eq 0 ]; then
+				sed 's/backup;/;/g' http.d/${_fn}.new -i
+			fi
 			cp http.d/${_fn}.new http.d/${_fn}.old
 			cp http.d/${_fn}.new http.d/${_fn}
 			_reload=1
@@ -427,9 +430,11 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 		fi
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
+
 		if [ $_nstream -eq 0 ]; then
-			sed 's/backup;/;/g' http.d/${_fn} -i
+			sed 's/backup;/;/g' http.d/${_fn}.new -i
 		fi
+
 		cat http.d/${_fn}.new >>${conf}-upstreams.conf.bk
 		echo >>${conf}-upstreams.conf.bk
 	done
