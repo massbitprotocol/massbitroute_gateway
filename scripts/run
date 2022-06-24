@@ -399,6 +399,7 @@ _update_network() {
 		fi
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
+		_nstream=$(wc -l http.d/${_fn} | cut -d' ' -f1)
 		_fn=ws-${_f}.upstream
 		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
@@ -426,6 +427,9 @@ _update_network() {
 			cp http.d/${_fn}.new http.d/${_fn}
 		fi
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
+		if [ $_nstream -eq 0 ]; then
+			sed 's/backup;/;/g' http.d/${_fn} -i
+		fi
 		cat http.d/${_fn}.new >>${conf}-upstreams.conf.bk
 		echo >>${conf}-upstreams.conf.bk
 	done
