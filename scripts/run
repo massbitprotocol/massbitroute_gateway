@@ -212,6 +212,11 @@ _reload() {
 	msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
 	st=$?
 	echo $st nginx_check - "$msg" >/tmp/nginx_check
+	grep "nginx: Permission denied" /tmp/nginx_check >/dev/null
+	if [ $? -eq 0 ]; then
+		chmod 755 -R /massbit
+	fi
+
 	grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
 	if [ $? -eq 0 ]; then
 		rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
