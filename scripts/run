@@ -217,7 +217,7 @@ _reload() {
 		chmod 755 -R /massbit
 
 		msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-		msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
+		# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
 		st=$?
 		echo $st nginx_check - "$msg" >/tmp/nginx_check
 
@@ -228,7 +228,7 @@ _reload() {
 		rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 		msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-		msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
+		# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
 		st=$?
 		echo $st nginx_check - "$msg" >/tmp/nginx_check
 
