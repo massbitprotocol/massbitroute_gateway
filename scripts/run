@@ -294,7 +294,9 @@ _optimize_upstream_file() {
 		_node_scores=$_node_scores1
 	fi
 	awk '{gsub(/unix:\/tmp\//,"",$2);gsub(/.sock/,"",$2);print $2;}' $_fstream | sort >$_node_ids
+	cat $_node_scores
 	join -j 1 -o 1.1,2.2 $_node_ids $_node_monitor | sort -k2 -nr >$_node_scores
+	cat $_node_scores
 	cp $_fstream ${_fstream}.bk
 	awk '{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_fstream
 	if [ ! -f "$_fstream" ]; then touch $_fstream; fi
