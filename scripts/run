@@ -299,6 +299,7 @@ _optimize_upstream_file() {
 	cat $_node_scores
 	cp $_fstream ${_fstream}.bk
 	awk '{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_fstream
+	cat $_fstream
 	if [ ! -f "$_fstream" ]; then touch $_fstream; fi
 	if [ -z "$_node_scores1" ]; then
 		rm $_node_scores
