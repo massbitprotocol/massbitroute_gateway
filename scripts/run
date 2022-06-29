@@ -16,8 +16,11 @@ log_install=$SITE_ROOT/logs/install.log
 debug_log=$SITE_ROOT/logs/debug.log
 GIT_PUBLIC_URL="https://github.com"
 export MBR_ENV=${MBR_ENV:-dev}
-
-user_id=$(cat $SITE_ROOT/vars/USER_ID)
+if [ -f "$SITE_ROOT/vars/USER_ID" ]; then
+	user_id=$(cat $SITE_ROOT/vars/USER_ID)
+else
+	user_id=1
+fi
 
 _repo() {
 	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
