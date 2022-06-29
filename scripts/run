@@ -23,10 +23,6 @@ _repo() {
 	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
 $service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
-
-	if [ -n "$GIT_PRIVATE_READ_URL" ]; then
-		REPOS="$REPOS $SITE_ROOT/${TYPE}deploy|$GIT_PRIVATE_READ_URL/massbitroute/${TYPE}deploy.git|$MBR_ENV"
-	fi
 }
 
 _repo
