@@ -319,9 +319,9 @@ _optimize_upstream_geo() {
 	_upstream_country=$(mktemp)
 	_upstream_continent=$(mktemp)
 	_upstream_other=$(mktemp)
-	awk '$2 > 100000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_country
-	awk '$2 <= 100000 && $2 > 10000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_continent
-	awk '$2 <= 10000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_other
+	awk 'NF > 0 && $2 > 100000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_country
+	awk 'NF > 0 && $2 <= 100000 && $2 > 10000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_continent
+	awk 'NF > 0 && $2 <= 10000{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_upstream_other
 
 	_upstream_country_n=$(wc -l $_upstream_country | cut -d' ' -f1)
 	_upstream_continent_n=$(wc -l $_upstream_continent | cut -d' ' -f1)
