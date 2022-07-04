@@ -401,18 +401,6 @@ _update_network() {
 	geo=${continent}-${country}
 
 	conf=http.d/gw-${blnet}
-	# if [ ! -f "$conf" ]; then touch ${conf}.orig; fi
-
-	# curl -sSfL $MBRAPI/deploy/${TYPE}conf/${blnet}.conf -o ${conf}.new >/dev/null
-	# if [ $? -ne 0 ]; then
-	# 	touch ${conf}.new
-	# fi
-
-	# $diff ${conf}.orig ${conf}.new >/dev/null
-	# if [ $? -ne 0 ]; then
-	# 	cp ${conf}.new ${conf}.orig
-	# 	_reload=1
-	# fi
 
 	rm http.d/upstreams-*.conf1
 	>${conf}-upstreams.conf.bk
@@ -471,7 +459,6 @@ _update_network() {
 		echo >>${conf}-upstreams.conf.bk
 	done
 	mv ${conf}-upstreams.conf.bk ${conf}-upstreams.conf
-	# cat http.d/upstreams-*.conf1.new >${conf}-upstreams.conf2
 
 	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
@@ -487,18 +474,6 @@ _update_network() {
 	else
 		cp ${conf}-nodes.new ${conf}-nodes.conf
 	fi
-
-	# curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-upstreams.conf -o ${conf}-upstreams.new >/dev/null
-	# if [ $? -ne 0 ]; then
-	# 	touch ${conf}-upstreams.new
-	# fi
-	# if [ ! -f "${conf}-upstreams.conf" ]; then touch ${conf}-upstreams.orig; fi
-	# $diff ${conf}-upstreams.orig ${conf}-upstreams.new >/dev/null
-	# if [ $? -ne 0 ]; then
-	# 	cp ${conf}-upstreams.new ${conf}-upstreams.orig
-	# 	cp ${conf}-upstreams.new ${conf}-upstreams.conf
-	# 	_reload=1
-	# fi
 
 	dapiconf=http.d/dapi-${blnet}.conf
 	if [ ! -f ${dapiconf}.orig ]; then touch ${dapiconf}.orig; fi
@@ -542,46 +517,11 @@ _update_network() {
 		fi
 
 	fi
-	# 	conf=http.d/provider-${blnet}.conf
-	# 	if [ ! -f ${conf}.orig ]; then touch ${conf}.orig; fi
 
-	# 	curl -sSfL $MBRAPI/deploy/provider/${blnet}.conf -o ${conf}.new >/dev/null
-	# 	if [ $? -ne 0 ]; then
-	# 		touch ${conf}.new
-	# 	fi
-
-	# 	$diff ${conf}.orig ${conf}.new >/dev/null
-	# 	if [ $? -ne 0 ]; then
-	# 		cp ${conf}.new ${conf}.orig
-	# 		cp ${conf}.orig ${conf}
-	# 		_reload=1
-	# 	fi
-
-	# 	backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/," backup ;");print}' $conf)
-
-	# 	if [ -n "$backup" ]; then
-	# 		grep server http.d/gw-${blnet}.conf.orig >/dev/null
-	# 		if [ $? -ne 0 ]; then
-	# 			backup=$(awk '/listen unix/{sub(/listen\s+unix/,"server unix");sub(/;/,";");print}' $conf)
-	# 			cat >http.d/gw-${blnet}.conf.orig.upstream <<EOF
-	# upstream ${blnet}.node.mbr.${DOMAIN}{
-	# }
-	# EOF
-	# 		else
-	# 			cp http.d/gw-${blnet}.conf.orig http.d/gw-${blnet}.conf.orig.upstream
-	# 		fi
-	# 		sed "/upstream/ a $backup" http.d/gw-${blnet}.conf.orig.upstream >http.d/gw-${blnet}.conf
-	# 		cat http.d/gw-${blnet}.conf
-	# 	fi
-	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway.conf >http.d/gateway.conf0
 	return $_reload
 }
 _load_config() {
 
-	# mkdir -p http.d
-	# rm http.d/*
-	# $SITE_ROOT/mbr node nodeinfo
-	# rm -f http.d/dapi*
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
 
@@ -611,15 +551,25 @@ _load_config() {
 	fi
 
 	_update_network $blockchain $network $id $continent $country
+	_st1=$?
+	if [ $_st1 -ne 0 ]; then
+		is_loading=$_st1
+	fi
+
 	# if [ "$id" == "7bc87cee-1425-4bfd-8f24-ba8f25ee5e2e"]; then
 	_optimize_upstream $blockchain $network $id $continent $country
+	# _st2=$?
+	# if [ $_st2 -ne 0 ]; then
+	# 	is_loading=$_st2
 	# fi
 
-	st=$?
-	echo $st
-	if [ $st -ne 0 ]; then
-		is_loading=1
-	fi
+	# fi
+
+	# st=$?
+	# echo $st
+	# if [ $st -ne 0 ]; then
+	# 	is_loading=1
+	# fi
 
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
 	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
