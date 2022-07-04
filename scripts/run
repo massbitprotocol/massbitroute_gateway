@@ -208,19 +208,19 @@ _reload() {
 	chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
 	nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-	msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
+	# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
 	st=$?
 	echo $st nginx_check - "$msg" >/tmp/nginx_check
-	grep "nginx: Permission denied" /tmp/nginx_check >/dev/null
-	if [ $? -eq 0 ]; then
-		chmod 755 -R /massbit
+	# grep "nginx: Permission denied" /tmp/nginx_check >/dev/null
+	# if [ $? -eq 0 ]; then
+	# 	chmod 755 -R /massbit
 
-		msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-		# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
-		st=$?
-		echo $st nginx_check - "$msg" >/tmp/nginx_check
+	# 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
+	# 	# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
+	# 	st=$?
+	# 	echo $st nginx_check - "$msg" >/tmp/nginx_check
 
-	fi
+	# fi
 
 	grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
 	if [ $? -eq 0 ]; then
