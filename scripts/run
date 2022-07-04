@@ -614,6 +614,7 @@ _load_config() {
 		# sed "s/proxy_pass http\:\/\/${blockchain}-${network}\.node\.mbr/proxy_pass http\:\/\/${blockchain}-${network}-${continent}-${country}\.node\.mbr/g" -i http.d/gateway.conf9
 	fi
 
+	$SITE_ROOT/cmd_server nginx -t
 	$SITE_ROOT/cmd_server start all
 	return $is_loading
 }
