@@ -303,7 +303,7 @@ _optimize_upstream_file() {
 	_n=$(awk 'NF > 0' $_node_scores | wc -l)
 	if [ $_n -gt 0 ]; then
 		cp $_fstream ${_fstream}.bk
-		awk '{printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_fstream
+		awk 'NF > 0 {printf "server unix:/tmp/%s.sock max_fails=1 fail_timeout=3s weight=%s;\n",$1, $2}' $_node_scores >$_fstream
 		cat $_fstream
 	fi
 	cat $_fstream
