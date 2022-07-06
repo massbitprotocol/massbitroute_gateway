@@ -346,7 +346,7 @@ _optimize_upstream() {
 	node_scores=$SITE_ROOT/logs/node_scores
 	_tmp1=$(mktemp)
 	timeout 30 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1 >/dev/null
-	if [ $? -ne 0 ]; then return _reload; fi
+	if [ $? -ne 0 ]; then return $_reload; fi
 	cat $_tmp1 | sort -k1 >$node_monitor
 	rm $_tmp1
 	if [ $? -ne 0 ]; then return; fi
