@@ -58,9 +58,11 @@ echo "----ENV" >>$debug_log
 cat $SITE_ROOT/.env_raw >>$debug_log
 echo >>$debug_log
 
-# curl -I ${MBRAPI} >>$debug_log
-echo "----Firewall" >>$debug_log
-iptables -nL >>$debug_log
+if [ -f "/usr/sbin/iptables" ]; then
+	# curl -I ${MBRAPI} >>$debug_log
+	echo "----Firewall" >>$debug_log
+	iptables -nL >>$debug_log
+fi
 echo "----DNS resolve" >>$debug_log
 cat /etc/resolv.conf >>$debug_log
 echo "----Services" >>$debug_log
