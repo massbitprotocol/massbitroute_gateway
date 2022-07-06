@@ -89,16 +89,6 @@ _add_host_file() {
 	fi
 }
 
-# _reload() {
-# 	app/gbc/bin/openresty /usr/local/openresty
-# 	apt-get update
-# 	apt-get install -y git apache2-utils supervisor jq python-is-python2 libssl-dev libmaxminddb-dev
-# 	systemctl enable supervisor
-# 	systemctl start supervisor
-# 	mkdir -p /etc/supervisor/conf.d
-# 	cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
-# 	supervisorctl update
-# }
 _supervisor() {
 	ln -sf /massbit/massbitroute/app/gbc /massbit/massbitroute/app/src/gbc
 	ln -sf /massbit/massbitroute/app/gbc/bin/openresty /usr/local/openresty
@@ -167,26 +157,10 @@ _reload() {
 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 	fi
 
-	# _geo_dir=$SITE_ROOT/data/geoip
-	# mkdir -p $_geo_dir
-
-	# if [ ! -f "$_geo_dir/GeoIP2-City.mmdb" ]; then
-	# 	curl -sSfL https://portal.$DOMAIN/deploy/info/geoip/GeoIP2-City.mmdb -o $_geo_dir/GeoIP2-City.mmdb
-	# fi
-
 	_maintain
 
 	id=$(cat $SITE_ROOT/vars/ID)
-	# _sc=$SITE_ROOT/${TYPE}deploy/debug/${id}.sh
-	# echo "Script path:$_sc" | tee -a $deploy_log
-	# if [ -f "$_sc" ]; then
-	# 	echo "is exists" | tee -a $deploy_log
-	# 	bash $_sc $SITE_ROOT | tee -a $debug_log
-	# fi
 
-	# rm $SITE_ROOT/logs/access/*
-	# $SITE_ROOT/mbr node nodeinfo
-	# rm /tmp/test_speed_* /tmp/check_speed
 	_add_host_file
 	if [ ! -L "/etc/letsencrypt" ]; then
 		rm -rf /etc/letsencrypt
@@ -194,9 +168,7 @@ _reload() {
 	fi
 
 	_tune
-	# if [ -f "/etc/logrotate.d/massbit" ]; then
-	# 	logrotate -vf /etc/logrotate.d/massbit
-	# fi
+
 	systemctl | awk '/apt/{print $1}' | while read _s; do
 		systemctl stop $_s
 		systemctl disable $_s
@@ -210,26 +182,16 @@ _reload() {
 	chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
 	nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-	# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
+
 	st=$?
 	echo $st nginx_check - "$msg" >/tmp/nginx_check
-	# grep "nginx: Permission denied" /tmp/nginx_check >/dev/null
-	# if [ $? -eq 0 ]; then
-	# 	chmod 755 -R /massbit
-
-	# 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-	# 	# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
-	# 	st=$?
-	# 	echo $st nginx_check - "$msg" >/tmp/nginx_check
-
-	# fi
 
 	grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
 	if [ $? -eq 0 ]; then
 		rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 		msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-		# msg="$msg $(ls -l $SITE_ROOT/bin/openresty/nginx/sbin/nginx)"
+
 		st=$?
 		echo $st nginx_check - "$msg" >/tmp/nginx_check
 
@@ -379,7 +341,11 @@ _optimize_upstream() {
 
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
-	timeout 30 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node | sort -k1 >$node_monitor
+	_tmp1=$(mktemp)
+	timeout 30 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1 >/dev/null
+	if [ $? -ne 0 ]; then return _reload; fi
+	cat $_tmp1 | sort -k1 >$node_monitor
+	rm $_tmp1
 	if [ $? -ne 0 ]; then return; fi
 	_tmp="$(cat $node_monitor)"
 	if [ -z "$_tmp" ]; then return; fi
