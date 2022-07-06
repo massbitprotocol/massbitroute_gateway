@@ -90,6 +90,38 @@ gw_ping() {
 		"$MBRAPI/api/v1/?action=${TYPE}.ping"
 
 }
+gw_geo() {
+	PORTAL_URL=$(cat $VAR/PORTAL_URL)
+	ZONE=$(cat $VAR/ZONE)
+	ID=$(cat $VAR/ID)
+	TOKEN=$(cat $VAR/TOKEN)
+	APP_KEY=$(cat $VAR/APP_KEY)
+	IP="$(curl -skL http://ipv4.icanhazip.com)"
+	n=$(grep -o "\." <<<"$IP" | wc -l)
+	if [ $n -ne 3 ]; then
+		echo "Your IP is unknown"
+		exit 1
+	fi
+
+	if [ -z "$IP" ]; then
+		echo "Your IP is unknown"
+		exit 1
+	fi
+
+	zone=$(curl -sk \
+		-H "Content-Type: application/json" \
+		-H "Authorization: $APP_KEY" \
+		"${PORTAL_URL}/mbr/$TYPE/${ID}/geo?ip=$IP" | jq .continent_code)
+	zone=$(echo $zone | sed 's/\"//g')
+	if [ -z "$zone" ]; then
+		echo "Cannot detect zone from IP $IP"
+	fi
+
+	if [ "$zone" != "${ZONE}" ]; then
+		echo "WARNING: Your IP $IP not in zone ${ZONE}"
+	fi
+}
+
 gw_nodeinfo() {
 	#	gw_apply
 	#	gw_nodekey
