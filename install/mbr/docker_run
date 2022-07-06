@@ -29,3 +29,5 @@ _run_cmd() {
 		massbit/massbitroute_${TYPE}:latest
 }
 $@
+
+#example _run_cmd gateway "https://portal.massbitroute.net/api/v1/gateway_install?id=6de43b8a-8785-4002-b6ff-016a8748b9a4&user_id=b363ddf4-42cf-4ccf-89c2-8c42c531ac99&blockchain=eth&network=mainnet&zone=EU&app_key=6SAmy22No6GhG35p7EBUMg&portal_url=https://portal.massbitroute.net&env=keiko"
