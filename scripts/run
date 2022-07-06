@@ -9,7 +9,7 @@ if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw >/dev/null; fi
 source $SITE_ROOT/scripts/base.sh >/dev/null
 # _load_env $SITE_ROOT
 cd $SITE_ROOT
-
+MBR=$SITE_ROOT/mbr
 mbr_root=/massbit/massbitroute/app
 service_dir=$mbr_root/src/sites/services
 log_install=$SITE_ROOT/logs/install.log
