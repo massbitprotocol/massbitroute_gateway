@@ -23,6 +23,8 @@ else
 fi
 
 _repo() {
+	if [ -e "$SITE_ROOT/cmd_server" ]; then bash $SITE_ROOT/cmd_server _env; fi
+	if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
 	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
 $service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
@@ -212,16 +214,24 @@ _reload() {
 
 _init() {
 
-	if [ ! -f "$SITE_ROOT/.env" ]; then
-		echo "$MBR_ENV" >$SITE_ROOT/.env
+	if [ -n "$MBR_ENV" ]; then
+		cat >$SITE_ROOT/.env <<EOF
+export GIT_PUBLIC_URL="https://github.com"
+export MBR_ENV=${MBR_ENV}
+EOF
 	fi
 
-	source $SITE_ROOT/.env >/dev/null
+	# if [ ! -f "$SITE_ROOT/.env" ]; then
+	# 	echo "$MBR_ENV" >$SITE_ROOT/.env
+	# fi
 
+	# source $SITE_ROOT/.env >/dev/null
+
+	_repo
 	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
 
-	bash $SITE_ROOT/cmd_server _env
-	source $SITE_ROOT/.env_raw >/dev/null
+	# bash $SITE_ROOT/cmd_server _env
+	# source $SITE_ROOT/.env_raw >/dev/null
 	_repo
 }
 
