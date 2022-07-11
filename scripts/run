@@ -674,6 +674,8 @@ _update_docker() {
 		$MBR node set ENV "$MBR_ENV"
 	fi
 
+	$MBR node nodeinfo
+
 	cat >$SITE_ROOT/.env <<EOF
 export GIT_PUBLIC_URL="https://github.com"
 export MBR_ENV=${MBR_ENV}
