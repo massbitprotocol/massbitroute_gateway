@@ -94,8 +94,8 @@ _add_host_file() {
 _supervisor() {
 	ln -sf /massbit/massbitroute/app/gbc /massbit/massbitroute/app/src/gbc
 	ln -sf /massbit/massbitroute/app/gbc/bin/openresty /usr/local/openresty
-	apt-get update
-	apt-get install -y git apache2-utils supervisor jq python-is-python2 libssl-dev libmaxminddb-dev
+	# apt-get update
+	# apt-get install -y git apache2-utils supervisor jq python-is-python2 libssl-dev libmaxminddb-dev
 	if [ -f "/usr/bin/systemctl" ]; then
 		systemctl enable supervisor
 		systemctl start supervisor
@@ -155,8 +155,8 @@ _reload() {
 
 	mkdir -p $SITE_ROOT/data/geoip
 	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-		apt update
-		apt-get install -y xz-utils
+		# apt update
+		# apt-get install -y xz-utils
 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 	fi
 
@@ -242,8 +242,8 @@ _prepare() {
 	# rm -rf $SITE_ROOT/tmp/*
 
 	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-		apt update
-		apt-get install -y xz-utils
+		# apt update
+		# apt-get install -y xz-utils
 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 	fi
 
