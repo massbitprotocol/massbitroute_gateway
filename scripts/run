@@ -356,10 +356,10 @@ _optimize_upstream() {
 	country=$5
 	_reload=0
 	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$country" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$blockchain" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$network" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$id" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$blockchain" \) -o \( "$blockchain" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$network" \) -o \( "$network" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$id" \) -o \( "$id" == "null" \) ]; then return $_reload; fi
 
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
@@ -390,10 +390,11 @@ _update_network() {
 	country=$5
 	_reload=0
 	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$country" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$blockchain" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$network" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
-	if [ \( -z "$id" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$blockchain" \) -o \( "$blockchain" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$network" \) -o \( "$network" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$id" \) -o \( "$id" == "null" \) ]; then return $_reload; fi
+
 	blnet=${blockchain}-${network}
 	geo=${continent}-${country}
 
