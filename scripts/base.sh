@@ -20,8 +20,10 @@ _git_clone() {
 	if [ -z "$_branch" ]; then _branch=$MBR_ENV; fi
 	# if [ -d "$_dir" ]; then rm -rf $_dir; fi
 	mkdir -p $_dir
+	git config --global --add safe.directory $_dir
 	if [ ! -d "$_dir/.git" ]; then
 		git clone $_url $_dir -b $_branch
+
 		git -C $_dir fetch --all
 		git -C $_dir branch --set-upstream-to=origin/$_branch
 
@@ -47,6 +49,7 @@ _update_sources() {
 	branch=$MBR_ENV
 	for _pathgit in $@; do
 		_path=$(echo $_pathgit | cut -d'|' -f1)
+		git config --global --add safe.directory $_path
 		_url=$(echo $_pathgit | cut -d'|' -f2)
 		_branch=$(echo $_pathgit | cut -d'|' -f3)
 		if [ -z "$_branch" ]; then _branch=$branch; fi
@@ -58,7 +61,12 @@ _update_sources() {
 		else
 
 			git -C $_path fetch --all
-			git -C $_path checkout $_branch
+			git -C $_path checkout $_branch 2>&1 | grep "error: Your local changes to the following files would be overwritten by checkout:" >/dev/null
+			if [ $? -eq 0 ]; then
+				rm -rf $_path
+				git clone $_url $_path -b $_branch
+			fi
+
 			tmp="$(git -C $_path pull 2>&1)"
 
 			echo "$tmp" | grep -i "updating"
