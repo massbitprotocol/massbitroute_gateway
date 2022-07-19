@@ -723,6 +723,13 @@ _update() {
 }
 
 _monitor() {
+	if [ -n "$MBR_ENV" ]; then
+		cat >$SITE_ROOT/.env <<EOF
+export GIT_PUBLIC_URL="https://github.com"
+export MBR_ENV=${MBR_ENV}
+EOF
+	fi
+
 	echo gateway >vars/TYPE
 	_update
 	_st_monitor=$?
