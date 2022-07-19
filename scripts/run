@@ -15,7 +15,7 @@ service_dir=$mbr_root/src/sites/services
 log_install=$SITE_ROOT/logs/install.log
 debug_log=$SITE_ROOT/logs/debug.log
 GIT_PUBLIC_URL="https://github.com"
-export MBR_ENV=${MBR_ENV:-dev}
+export MBR_ENV=${MBR_ENV:-keiko}
 if [ -f "$SITE_ROOT/vars/USER_ID" ]; then
 	user_id=$(cat $SITE_ROOT/vars/USER_ID)
 else
