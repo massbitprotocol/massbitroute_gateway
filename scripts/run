@@ -355,11 +355,11 @@ _optimize_upstream() {
 	continent=$4
 	country=$5
 	_reload=0
-	if [ -z "$continent" ]; then return $_reload; fi
-	if [ -z "$country" ]; then return $_reload; fi
-	if [ -z "$blockchain" ]; then return $_reload; fi
-	if [ -z "$network" ]; then return $_reload; fi
-	if [ -z "$id" ]; then return $_reload; fi
+	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$country" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$blockchain" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$network" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$id" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
 
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
@@ -389,11 +389,11 @@ _update_network() {
 	continent=$4
 	country=$5
 	_reload=0
-	if [ -z "$continent" ]; then return $_reload; fi
-	if [ -z "$country" ]; then return $_reload; fi
-	if [ -z "$blockchain" ]; then return $_reload; fi
-	if [ -z "$network" ]; then return $_reload; fi
-	if [ -z "$id" ]; then return $_reload; fi
+	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$country" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$blockchain" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$network" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
+	if [ \( -z "$id" \) -o \( "$continent" == "null" \) ]; then return $_reload; fi
 	blnet=${blockchain}-${network}
 	geo=${continent}-${country}
 
@@ -402,7 +402,6 @@ _update_network() {
 	rm http.d/upstreams-*.conf1
 	>${conf}-upstreams.conf.bk
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
-		if [ -z "$_f" ]; then continue; fi
 		_fn=${_f}.upstream
 		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
