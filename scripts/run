@@ -402,6 +402,7 @@ _update_network() {
 	rm http.d/upstreams-*.conf1
 	>${conf}-upstreams.conf.bk
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
+		if [ -z "$_f" ]; then continue; fi
 		_fn=${_f}.upstream
 		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
