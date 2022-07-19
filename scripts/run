@@ -24,7 +24,7 @@ fi
 
 _repo() {
 	if [ -e "$SITE_ROOT/cmd_server" ]; then bash $SITE_ROOT/cmd_server _env; fi
-	# if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
+	if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
 	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
 $SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
 $service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
@@ -46,7 +46,7 @@ _maintain() {
 	truncate -s 0 /var/log/atop/*
 	bash $SITE_ROOT/mbr node nodeinfo
 	rm /tmp/test_speed_* /tmp/check_speed
-	_debug
+	# _debug
 }
 
 _tune() {
