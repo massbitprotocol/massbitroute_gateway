@@ -724,6 +724,7 @@ _update() {
 }
 
 _monitor() {
+	git -C $SITE_ROOT reset --hard
 	if [ -n "$MBR_ENV" ]; then
 		cat >$SITE_ROOT/.env <<EOF
 export GIT_PUBLIC_URL="https://github.com"
