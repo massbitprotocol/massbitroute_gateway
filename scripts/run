@@ -389,7 +389,7 @@ _update_network() {
 
 	conf=http.d/gw-${blnet}
 
-	rm http.d/upstreams-*.conf1
+	# rm http.d/upstreams-*.conf1
 	>${conf}-upstreams.conf.bk
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
 		_fn=${_f}.upstream
