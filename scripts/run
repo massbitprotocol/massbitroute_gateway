@@ -131,6 +131,7 @@ _load_config() {
 	id=$(cat $SITE_ROOT/vars/ID)
 	if [ -z "$id" ]; then return $is_reloading; fi
 
+	echo curl -skSfL $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
 	curl -skSfL $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
 	if [ ! -f "http.d/${id}.conf" ]; then
 		touch http.d/${id}.conf
@@ -174,15 +175,15 @@ _reload() {
 	_maintain
 
 	id=$(cat $SITE_ROOT/vars/ID)
-	_sc=$(mktemp)
-	curl -sk $PORTAL_URL/deploy/info/debug/$TYPE/${id} -o $_sc >/dev/null
-	if [ $? -eq 0 ]; then
-		echo "Script path:$_sc" | tee -a $debug_log
-		bash $_sc $SITE_ROOT | tee -a $debug_log
-	fi
+	# _sc=$(mktemp)
+	# curl -sk $PORTAL_URL/deploy/info/debug/$TYPE/${id} -o $_sc >/dev/null
+	# if [ $? -eq 0 ]; then
+	# 	echo "Script path:$_sc" | tee -a $debug_log
+	# 	bash $_sc $SITE_ROOT | tee -a $debug_log
+	# fi
 
-	rm $_sc
-	_add_host_file
+	# rm $_sc
+	# _add_host_file
 	if [ ! -L "/etc/letsencrypt" ]; then
 		rm -rf /etc/letsencrypt
 		ln -sf /massbit/massbitroute/app/src/sites/services/gateway/ssl /etc/letsencrypt
