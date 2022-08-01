@@ -5,6 +5,7 @@ MBR=$SITE_ROOT/mbr
 mkdir -p $SITE_ROOT
 export DEBIAN_FRONTEND=noninteractive
 export HOME=$SITE_ROOT
+curl="/usr/bin/curl -skSfL"
 if [ -e "$SITE_ROOT/cmd_server" ]; then bash $SITE_ROOT/cmd_server _env; fi
 if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw >/dev/null; fi
 
@@ -92,7 +93,7 @@ _add_host_file() {
 	fi
 	sed '/</d' /etc/hosts -i /etc/hosts.bk
 	cat /etc/hosts.bk >/tmp/hosts
-	curl -s $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
+	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
 	if [ -f "/tmp/hosts.1" ]; then
 		cat /tmp/hosts.1 >>/tmp/hosts
 		cat /tmp/hosts >/etc/hosts
@@ -131,8 +132,8 @@ _load_config() {
 	id=$(cat $SITE_ROOT/vars/ID)
 	if [ -z "$id" ]; then return $is_reloading; fi
 
-	echo curl -skSfL $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
-	curl -skSfL $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
+	echo $curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
+	$curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
 	if [ ! -f "http.d/${id}.conf" ]; then
 		touch http.d/${id}.conf
 	fi
@@ -155,7 +156,7 @@ _add_host_file() {
 	fi
 	sed '/</d' /etc/hosts -i /etc/hosts.bk
 	cat /etc/hosts.bk >/tmp/hosts
-	curl -s $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
+	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
 	if [ -f "/tmp/hosts.1" ]; then
 		cat /tmp/hosts.1 >>/tmp/hosts
 		cat /tmp/hosts >/etc/hosts
@@ -355,8 +356,8 @@ _optimize_upstream() {
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
 	_tmp1=$(mktemp)
-	echo curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1
-	timeout 30 curl -sSfL https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1 >/dev/null
+	echo $curl https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1
+	timeout 30 $curl https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1 >/dev/null
 	if [ $? -ne 0 ]; then return $_reload; fi
 	cat $_tmp1 | sort -k1 >$node_monitor
 	rm $_tmp1
@@ -395,8 +396,8 @@ _update_network() {
 	>${conf}-upstreams.conf.bk
 	for _f in $blnet ${blnet}-${continent} ${blnet}-${geo}-v1 ${blnet}-${geo}-v1-v2 ${blnet}-${geo}; do
 		_fn=${_f}.upstream
-		echo curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new
-		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		echo $curl $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new
+		timeout 30 $curl $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
@@ -411,8 +412,8 @@ _update_network() {
 
 		_nstream=$(wc -l http.d/${_fn} | cut -d' ' -f1)
 		_fn=ws-${_f}.upstream
-		echo curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new
-		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		echo $curl $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new
+		timeout 30 $curl $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
@@ -426,8 +427,8 @@ _update_network() {
 		if [ ! -f "http.d/${_fn}" ]; then touch http.d/${_fn}; fi
 
 		_fn=upstreams-${_f}.conf1
-		echo curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new
-		timeout 30 curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
+		echo $curl $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new
+		timeout 30 $curl $PORTAL_URL/deploy/${TYPE}conf/${_fn} -o http.d/${_fn}.new >/dev/null
 		if [ ! -f "http.d/${_fn}.new" ]; then touch http.d/${_fn}.new; fi
 		if [ ! -f "http.d/${_fn}.old" ]; then touch http.d/${_fn}.old; fi
 		$diff http.d/${_fn}.new http.d/${_fn}.old >/dev/null
@@ -452,8 +453,8 @@ _update_network() {
 	done
 	mv ${conf}-upstreams.conf.bk ${conf}-upstreams.conf
 
-	echo curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new
-	curl -sSfL $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
+	echo $curl $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new
+	$curl $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}-nodes.new
 	fi
@@ -471,8 +472,8 @@ _update_network() {
 	dapiconf=http.d/dapi-${blnet}.conf
 	if [ ! -f ${dapiconf}.orig ]; then touch ${dapiconf}.orig; fi
 
-	echo curl -sSfL $PORTAL_URL/deploy/dapiconf/${blnet}.conf -o ${dapiconf}.new
-	curl -sSfL $PORTAL_URL/deploy/dapiconf/${blnet}.conf -o ${dapiconf}.new >/dev/null
+	echo $curl $PORTAL_URL/deploy/dapiconf/${blnet}.conf -o ${dapiconf}.new
+	$curl $PORTAL_URL/deploy/dapiconf/${blnet}.conf -o ${dapiconf}.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${dapiconf}.new
 	fi
@@ -730,7 +731,7 @@ _monitor() {
 	# supervisorctl update
 	echo $(date +%s) >/tmp/mbr_monitor_updated
 
-	# curl -sSfL $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
+	# $curl $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
 	# if [ $? -eq 0 ]; then
 	# 	if [ ! -f "/tmp/version.old" ]; then touch /tmp/version.old; fi
 	# 	diff -s /tmp/version.new /tmp/version.old
