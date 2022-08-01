@@ -6,7 +6,7 @@ NODE_CONF_TMPL=$DIR/http.d
 TYPE=gateway
 VAR=$DIR/vars
 
-curl="/usr/bin/curl -sk"
+curl="/usr/bin/curl -skSfL"
 
 if [ ! -d "$VAR" ]; then
 	mkdir $VAR
