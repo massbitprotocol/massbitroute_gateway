@@ -1,179 +1,118 @@
 #!/bin/bash
 DIR=$(dirname $(realpath $0))
+SITE_ROOT=$DIR
 NODE_CONF_HTTP_TMPL=$DIR/http.d/local
 NODE_CONF_TMPL=$DIR/http.d
 TYPE=gateway
 VAR=$DIR/vars
 
+curl="/usr/bin/curl -skSfL"
+
 if [ ! -d "$VAR" ]; then
 	mkdir $VAR
 fi
 
-if [ -f "$VAR/ENV" ]; then
-	ENV=$(cat $VAR/ENV)
-fi
-if [ "x$ENV" == "x" ]; then
-	source $DIR/.env
+if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw >/dev/null; fi
+if [ -z "$MBR_ENV" ]; then
+	echo "MBR_ENV not defined"
+	exit 1
 else
-	source $DIR/.env.${ENV}
+	if [ -f "$SITE_ROOT/.env.$MBR_ENV" ]; then source $SITE_ROOT/.env.$MBR_ENV >/dev/null; fi
 fi
+
 cd $DIR
 
 echo $DIR >$VAR/SITE_ROOT
 mkdir -p $DIR/tmp $DIR/logs $DIR/data
 
-# gw_init() {
-# 	find /tmp -iname '*.sock' -delete
-# 	val=$(cat vars/SITE_ROOT | sed 's/\//\\\//g')
-# 	sed "s/_SITE_ROOT_/$val/g" nginx.conf.tmpl >nginx.conf
-
-# 	if [ ! -x "/usr/local/openresty" ]; then
-# 		ln -sf $DIR/bin/openresty /usr/local/openresty
-# 	fi
-# 	sed "s/_SITE_ROOT_/$val/g" mbr_gateway.conf.tmpl >/etc/supervisor/conf.d/mbr_gateway.conf
-
-# 	supervisorctl update
-# }
-
-# gw_patch_conf() {
-# 	TMPL=$1
-# 	CONF=$2
-# 	if [ ! -f "$TMPL" ]; then return; fi
-# 	cp $TMPL $CONF
-# 	ls vars | while read key; do
-# 		val=$(cat vars/$key | sed 's/\//\\\//g')
-# 		sed "s/_${key}_/$val/g" -i $CONF
-# 	done
-# }
-# gw_apply() {
-# 	gw_init
-# 	machine_id=$(cat $VAR/NODE_ID)
-# 	mbrnodekey=$(cat $VAR/NODE_KEY)
-
-# 	for _f in gateway; do
-# 		gw_patch_conf $NODE_CONF_HTTP_TMPL/${_f}.conf.tmpl $NODE_CONF_HTTP_TMPL/${_f}.conf
-# 	done
-# 	if [ ! -f "$DIR/etc/htpasswd" ]; then
-# 		htpasswd -cb etc/htpasswd $machine_id $mbrnodekey
-# 	else
-# 		htpasswd -b etc/htpasswd $machine_id $mbrnodekey
-# 	fi
-
-# 	$DIR/scripts/run _reload
-# }
-# gw_getkey() {
-# 	machine_id=$(cat /var/lib/dbus/machine-id)
-# 	mbrnodekey=$(curl -s -H "mbrnodeid: $machine_id" "$MBRAPI/api/v1/mbrnodekey")
-# 	echo $machine_id >$VAR/NODE_ID
-# 	echo $mbrnodekey >$VAR/NODE_KEY
-# 	echo "NODE_ID: $machine_id"
-# 	echo "NODE_KEY: $mbrnodekey"
-# }
 gw_show() {
 	ls vars | while read key; do
 		val=$(cat vars/$key | sed 's/\//\\\//g')
 		echo "$key: $val"
 	done
 }
-gw_ping() {
-	#	gw_apply
-	#	gw_nodekey
-	USER_ID=$(cat $VAR/USER_ID)
-	ID=$(cat $VAR/ID)
-	TOKEN=$(cat $VAR/TOKEN)
-	NETWORK=$(cat $VAR/NETWORK)
-	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
-	curl -s \
-		-X POST \
-		-H "Content-Type: application/json" \
-		-d "{\"blockchain\":\"$BLOCKCHAIN\", \"network\":\"$NETWORK\", \"id\":\"$ID\" , \"token\":\"$TOKEN\" , \"user_id\":\"$USER_ID\"}" \
-		"$MBRAPI/api/v1/?action=${TYPE}.ping"
 
+gw_geo() {
+	PORTAL_URL=$(cat $VAR/PORTAL_URL)
+	ZONE=$(cat $VAR/ZONE)
+	ID=$(cat $VAR/ID)
+	# TOKEN=$(cat $VAR/TOKEN)
+	APP_KEY=$(cat $VAR/APP_KEY)
+	IP="$($curl -L http://ipv4.icanhazip.com)"
+	n=$(grep -o "\." <<<"$IP" | wc -l)
+	if [ $n -ne 3 ]; then
+		echo "Your IP is unknown"
+		exit 1
+	fi
+
+	if [ -z "$IP" ]; then
+		echo "Your IP is unknown"
+		exit 1
+	fi
+
+	zone=$($curl \
+		-H "Content-Type: application/json" \
+		-H "Authorization: $APP_KEY" \
+		"${PORTAL_URL}/mbr/$TYPE/${ID}/geo?ip=$IP" | jq .continent_code)
+	zone=$(echo $zone | sed 's/\"//g')
+	if [ -z "$zone" ]; then
+		echo "Cannot detect zone from IP $IP"
+	fi
+
+	if [ "$zone" != "${ZONE}" ]; then
+		echo "WARNING: Your IP $IP not in zone ${ZONE}"
+	fi
 }
+
 gw_nodeinfo() {
-	#	gw_apply
-	#	gw_nodekey
-	USER_ID=$(cat $VAR/USER_ID)
-	TOKEN=$(cat $VAR/TOKEN)
-	NETWORK=$(cat $VAR/NETWORK)
-	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
-	IP=$(cat $VAR/IP)
+
 	ID=$(cat $VAR/ID)
 	APP_KEY=$(cat $VAR/APP_KEY)
 	PORTAL_URL=$(cat $VAR/PORTAL_URL)
-	if [ -n "$IP" ]; then
-		IP=$(curl -s ipv4.icanhazip.com)
-		n=$(grep -o "\." <<<"$IP" | wc -l)
-		if [ $n -eq 3 ]; then
-			echo $IP >$VAR/IP
-		fi
 
-	fi
-
-	curl -s \
+	$curl \
 		-H "Content-Type: application/json" \
 		-H "Authorization: $APP_KEY" \
-		"$PORTAL_URL/mbr/gateway/$ID/info" >$VAR/RAW
+		"$PORTAL_URL/mbr/$TYPE/$ID/info" >$VAR/RAW
 	cat $VAR/RAW
+	IP=$(cat $VAR/RAW | jq .geo.ip)
+	if [ -z "$IP" ]; then
+		echo $IP >$VAR/IP
+	fi
 
 }
 gw_nodeverify() {
-	#	gw_apply
-	#	gw_nodekey
-	USER_ID=$(cat $VAR/USER_ID)
-	TOKEN=$(cat $VAR/TOKEN)
-	NETWORK=$(cat $VAR/NETWORK)
-	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
-	IP=$(cat $VAR/IP)
+
 	ID=$(cat $VAR/ID)
 	APP_KEY=$(cat $VAR/APP_KEY)
 	PORTAL_URL=$(cat $VAR/PORTAL_URL)
-	if [ -n "$IP" ]; then
-		IP=$(curl -s ipv4.icanhazip.com)
-		n=$(grep -o "\." <<<"$IP" | wc -l)
-		if [ $n -eq 3 ]; then
-			echo $IP >$VAR/IP
-		fi
 
-	fi
-
-	curl -s \
+	$curl \
 		-H "Content-Type: application/json" \
 		-H "Authorization: $APP_KEY" \
-		"$PORTAL_URL/mbr/gateway/$ID/verify"
+		"$PORTAL_URL/mbr/$TYPE/$ID/verify"
 }
 
 gw_register() {
-	#	gw_apply
-	#	gw_nodekey
-	USER_ID=$(cat $VAR/USER_ID)
-	TOKEN=$(cat $VAR/TOKEN)
-	NETWORK=$(cat $VAR/NETWORK)
-	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
+
 	ID=$(cat $VAR/ID)
 	APP_KEY=$(cat $VAR/APP_KEY)
 	PORTAL_URL=$(cat $VAR/PORTAL_URL)
-	curl -s \
+	$curl \
 		-H "Content-Type: application/json" \
 		-H "Authorization: $APP_KEY" \
-		"$PORTAL_URL/mbr/gateway/$ID/register"
+		"$PORTAL_URL/mbr/$TYPE/$ID/register"
 
 }
 gw_unregister() {
-	#	gw_apply
-	#	gw_nodekey
-	USER_ID=$(cat $VAR/USER_ID)
-	ID=$(cat $VAR/ID)
-	TOKEN=$(cat $VAR/TOKEN)
-	NETWORK=$(cat $VAR/NETWORK)
-	BLOCKCHAIN=$(cat $VAR/BLOCKCHAIN)
+
 	ID=$(cat $VAR/ID)
 	APP_KEY=$(cat $VAR/APP_KEY)
 	PORTAL_URL=$(cat $VAR/PORTAL_URL)
-	curl -s \
+	$curl \
 		-H "Content-Type: application/json" \
 		-H "Authorization: $APP_KEY" \
-		"$PORTAL_URL/mbr/gateway/$ID/unregister"
+		"$PORTAL_URL/mbr/$TYPE/$ID/unregister"
 
 }
 gw_set() {

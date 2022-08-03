@@ -34,7 +34,7 @@ id=$(cat $SITE_ROOT/vars/ID)
 # 	rm $f
 # done
 
-echo "$(date)" >$debug_log
+echo "$(TZ=":Asia/Ho_Chi_Minh" date)" >$debug_log
 
 echo "--OS" >>$debug_log
 cat /etc/lsb-release >>$debug_log
@@ -58,15 +58,18 @@ echo "----ENV" >>$debug_log
 cat $SITE_ROOT/.env_raw >>$debug_log
 echo >>$debug_log
 
-# curl -I ${MBRAPI} >>$debug_log
-echo "----Firewall" >>$debug_log
-iptables -nL >>$debug_log
+if [ -f "/usr/sbin/iptables" ]; then
+	# curl -I ${MBRAPI} >>$debug_log
+	echo "----Firewall" >>$debug_log
+	iptables -nL >>$debug_log
+fi
 echo "----DNS resolve" >>$debug_log
 cat /etc/resolv.conf >>$debug_log
 echo "----Services" >>$debug_log
 supervisorctl status >>$debug_log
-$cmd status >>$debug_log
+
 echo "----Supervisor" >>$debug_log
+$cmd status >>$debug_log
 ls /etc/supervisor/conf.d/ >>$debug_log
 if [ ! -f "/usr/bin/netstat" ]; then apt-get install -y net-tools; fi
 echo "--Network interface" >>$debug_log

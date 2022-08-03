@@ -2,7 +2,13 @@
 
 Component used for routing traffic to backend providers
 
+## Run with Docker
 
+examples
+
+```
+docker run -ti --rm  -e "MBR_ENV=shamu" -e "INSTALL_CMD=https://portal.massbitroute.net/api/v1/gateway_install?id=39d2c17f-c15b-4018-8cb8-4fdb41dd3f56&user_id=b363ddf4-42cf-4ccf-89c2-8c42c531ac99&blockchain=eth&network=mainnet&zone=EU&app_key=YNOaBzhTV5Gax6VT7r2BUg&portal_url=https://portal.massbitroute.net&env=shamu" massbit/massbitroute_gateway_dev:0.0.1-shamu-dev  -n
+```
 ## System requirement
 
 Currently, we only support Ubuntu 20.04 x64 with a minimum requirement of 4 vCPU and 4G RAM, 40GB free space

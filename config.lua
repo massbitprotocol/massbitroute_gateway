@@ -21,6 +21,8 @@ stdout_logfile=_SITE_ROOT_/../mkagent/logs/monitor_client.log
     ]]
     },
     supervisor = [[
+]],
+    supervisor1 = [[
 [program:fisherman]
 command=/bin/bash _SITE_ROOT_/services/fisherman/run.sh _SITE_ROOT_
 autorestart=true
