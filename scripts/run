@@ -48,7 +48,10 @@ _save_env() {
 	fi
 }
 _repo() {
-	_save_env
+	if [ -z "$MBR_ENV" ]; then
+		echo "MBR_ENV missing"
+		exit 1
+	fi
 	REPOS=""
 }
 
