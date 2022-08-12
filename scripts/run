@@ -6,8 +6,7 @@ mkdir -p $SITE_ROOT
 export DEBIAN_FRONTEND=noninteractive
 export HOME=$SITE_ROOT
 curl="/usr/bin/curl -skSfL"
-if [ -e "$SITE_ROOT/cmd_server" ]; then bash $SITE_ROOT/cmd_server _env; fi
-if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw >/dev/null; fi
+diff="diff -s"
 
 source $SITE_ROOT/scripts/base.sh >/dev/null
 cd $SITE_ROOT
@@ -20,29 +19,35 @@ debug_log=$SITE_ROOT/logs/debug.log
 
 export GIT_PUBLIC_URL="https://github.com"
 
-if [ -f "$SITE_ROOT/vars/USER_ID" ]; then
-	user_id=$(cat $SITE_ROOT/vars/USER_ID)
-else
-	user_id=1
-fi
-
-_repo() {
-	if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
-
+_save_env() {
 	if [ -z "$MBR_ENV" ]; then
-		echo "MBR_ENV not defined"
+		echo "MBR_ENV missing"
+		exit 1
+	fi
+
+	if [ -z "$PORTAL_URL" ]; then
+		echo "PORTAL_URL missing"
 		exit 1
 	else
-		if [ -f "$SITE_ROOT/.env.$MBR_ENV" ]; then source $SITE_ROOT/.env.$MBR_ENV >/dev/null; fi
+		echo $PORTAL_URL >$SITE_ROOT/vars/PORTAL_URL
 	fi
-	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
-$SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
-$service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
+	if [ -z "$DOMAIN" ]; then
+		DOMAIN=$(echo $PORTAL_URL | cut -d'.' -f2-)
+	fi
+	if [ -z "$DOMAIN" ]; then
+		echo "DOMAIN missing"
+		exit 1
+	else
+		echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
+	fi
 }
-
-_repo
-
-diff="diff -s"
+_repo() {
+	if [ -z "$MBR_ENV" ]; then
+		echo "MBR_ENV missing"
+		exit 1
+	fi
+	REPOS=""
+}
 
 _debug() {
 	timeout 30 $SITE_ROOT/scripts/debug.sh
@@ -86,21 +91,6 @@ $SITE_ROOT/logs/*.log {
 EOF
 }
 
-_add_host_file() {
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	if [ ! -f "/etc/hosts.bk" ]; then
-		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
-	fi
-	sed '/</d' /etc/hosts -i /etc/hosts.bk
-	cat /etc/hosts.bk >/tmp/hosts
-	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
-	if [ -f "/tmp/hosts.1" ]; then
-		cat /tmp/hosts.1 >>/tmp/hosts
-		cat /tmp/hosts >/etc/hosts
-		rm /tmp/hosts.1
-	fi
-}
-
 _supervisor() {
 	ln -sf /massbit/massbitroute/app/gbc /massbit/massbitroute/app/src/gbc
 	ln -sf /massbit/massbitroute/app/gbc/bin/openresty /usr/local/openresty
@@ -117,116 +107,29 @@ _supervisor() {
 		supervisorctl update
 	fi
 }
-_install() {
-	_init >>$log_install
-	_prepare >>$log_install
-	_install_repos >>$log_install
-	_supervisor >>$log_install
-}
 
-_load_config() {
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	mkdir -p $SITE_ROOT/http.d
-	# $SITE_ROOT/mbr node nodeinfo
-	is_reloading=0
-	id=$(cat $SITE_ROOT/vars/ID)
-	if [ -z "$id" ]; then return $is_reloading; fi
-
-	echo $curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
-	$curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
-	if [ ! -f "http.d/${id}.conf" ]; then
-		touch http.d/${id}.conf
-	fi
-
-	diff -s http.d/${id}.conf http.d/${id}.conf.new
-	if [ $? -ne 0 ]; then
-		mv http.d/${id}.conf.new http.d/${id}.conf
-		is_reloading=1
-	fi
-	sed "s/__NODE_ID__/$id/g" etc/node.conf >http.d/node.conf0
-	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/node.conf0
-
-	$SITE_ROOT/cmd_server start all
-	return $is_reloading
-}
-_add_host_file() {
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	if [ ! -f "/etc/hosts.bk" ]; then
-		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
-	fi
-	sed '/</d' /etc/hosts -i /etc/hosts.bk
-	cat /etc/hosts.bk >/tmp/hosts
-	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
-	if [ -f "/tmp/hosts.1" ]; then
-		cat /tmp/hosts.1 >>/tmp/hosts
-		cat /tmp/hosts >/etc/hosts
-		rm /tmp/hosts.1
-	fi
-}
+# _add_host_file() {
+# 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+# 	if [ ! -f "/etc/hosts.bk" ]; then
+# 		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
+# 	fi
+# 	sed '/</d' /etc/hosts -i /etc/hosts.bk
+# 	cat /etc/hosts.bk >/tmp/hosts
+# 	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
+# 	if [ -f "/tmp/hosts.1" ]; then
+# 		cat /tmp/hosts.1 >>/tmp/hosts
+# 		cat /tmp/hosts >/etc/hosts
+# 		rm /tmp/hosts.1
+# 	fi
+# }
 
 _reload() {
 
-	mkdir -p $SITE_ROOT/data/geoip
-	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-		# apt update
-		# apt-get install -y xz-utils
-		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	fi
-
-	_maintain
-
-	id=$(cat $SITE_ROOT/vars/ID)
-	# _sc=$(mktemp)
-	# curl -sk $PORTAL_URL/deploy/info/debug/$TYPE/${id} -o $_sc >/dev/null
-	# if [ $? -eq 0 ]; then
-	# 	echo "Script path:$_sc" | tee -a $debug_log
-	# 	bash $_sc $SITE_ROOT | tee -a $debug_log
-	# fi
-
-	# rm $_sc
-	# _add_host_file
-	if [ ! -L "/etc/letsencrypt" ]; then
-		rm -rf /etc/letsencrypt
-		ln -sf /massbit/massbitroute/app/src/sites/services/gateway/ssl /etc/letsencrypt
-	fi
-
-	_tune
-
-	if [ -f "/usr/bin/systemctl" ]; then
-		systemctl | awk '/apt/{print $1}' | while read _s; do
-			systemctl stop $_s
-			systemctl disable $_s
-		done
-	fi
 	pkill -f push.py
-	pkill -f push.sh
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
 
-	chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
-	nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
-	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-
-	st=$?
-	echo $st nginx_check - "$msg" >/tmp/nginx_check
-
-	grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
-	if [ $? -eq 0 ]; then
-		rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
-		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-		msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-
-		st=$?
-		echo $st nginx_check - "$msg" >/tmp/nginx_check
-
-	fi
-
-	#_debug
-}
-
-_init() {
-	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
 }
 
 _prepare() {
@@ -243,20 +146,22 @@ _prepare() {
 
 }
 _install_repos() {
-	_git_config
+	if [ -z "$MBR_ENV" ]; then
+		echo "MBR_ENV missing"
+		exit 1
+	fi
 	_repo
-	for _pathgit in $REPOS; do
-		_path=$(echo $_pathgit | cut -d'|' -f1)
-		_url=$(echo $_pathgit | cut -d'|' -f2)
-		_branch=$(echo $_pathgit | cut -d'|' -f3)
-		_git_clone $_url $_path $_branch
-	done
+	_install_sources $REPOS
+	_install_status=$?
+	return $_install_status
 }
 
+_install_one() {
+	_prepare
+	_install_repos
+}
 _install() {
-	_init >>$log_install
-	_prepare >>$log_install
-	_install_repos >>$log_install
+	_install_one >>$log_install
 	_supervisor >>$log_install
 }
 
@@ -272,9 +177,9 @@ _optimize_upstream_file() {
 		_node_scores=$_node_scores1
 	fi
 	awk '{gsub(/unix:\/tmp\//,"",$2);gsub(/.sock/,"",$2);print $2;}' $_fstream | sort >$_node_ids
-	cat $_node_ids
-	cat $_node_monitor
-	cat $_node_scores
+	# cat $_node_ids
+	# cat $_node_monitor
+	# cat $_node_scores
 	join -j 1 -o 1.1,2.2 $_node_ids $_node_monitor | sort -k2 -nr >$_node_scores
 	cat $_node_scores
 	echo >>$_node_scores
@@ -328,14 +233,14 @@ _optimize_upstream_geo() {
 		fi
 	fi
 
-	echo "Upstream country"
-	cat $_upstream_country
+	# echo "Upstream country"
+	# cat $_upstream_country
 
-	echo "Upstream continent"
-	cat $_upstream_continent
+	# echo "Upstream continent"
+	# cat $_upstream_continent
 
-	echo "Upstream other"
-	cat $_upstream_other
+	# echo "Upstream other"
+	# cat $_upstream_other
 
 	rm $_upstream_continent $_upstream_country $_upstream_other
 
@@ -376,6 +281,7 @@ _optimize_upstream() {
 }
 _update_network() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+
 	blockchain=$1
 	network=$2
 	id=$3
@@ -526,39 +432,16 @@ _load_config() {
 
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
+	user_id=$(cat $SITE_ROOT/vars/USER_ID)
 
 	if [ -z "$id" ]; then return $is_loading; fi
+	if [ -z "$user_id" ]; then return $is_loading; fi
 
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	if [ -z "$blockchain" ]; then return $is_loading; fi
 
 	network=$(cat $SITE_ROOT/vars/NETWORK)
 	if [ -z "$network" ]; then return $is_loading; fi
-
-	continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
-	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
-
-	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then
-		continent=""
-		$SITE_ROOT/mbr node nodeinfo
-		continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
-		country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
-
-	fi
-	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then
-		country=""
-		$SITE_ROOT/mbr node nodeinfo
-		continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
-		country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
-	fi
-
-	_update_network $blockchain $network $id $continent $country
-	_st1=$?
-	if [ $_st1 -ne 0 ]; then
-		is_loading=$_st1
-	fi
-
-	_optimize_upstream $blockchain $network $id $continent $country
 
 	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
 	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
@@ -571,6 +454,45 @@ _load_config() {
 	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
 	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
 	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
+
+	continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+
+	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then
+		return
+		# continent=""
+		# $SITE_ROOT/mbr node nodeinfo
+		# continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+		# country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+
+	fi
+	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then
+		return
+		# country=""
+		# $SITE_ROOT/mbr node nodeinfo
+		# continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+		# country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+	fi
+
+	_update_network $blockchain $network $id $continent $country
+	_st1=$?
+	if [ $_st1 -ne 0 ]; then
+		is_loading=$_st1
+	fi
+
+	_optimize_upstream $blockchain $network $id $continent $country
+
+	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
+	# sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
+	# sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
+	# sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
+	# sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
+
+	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
+	# sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf9
+	# sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
+	# sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
+	# sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
 
 	blnet=${blockchain}-${network}
 	conf=http.d/gw-${blnet}
@@ -606,13 +528,6 @@ _load_config() {
 	$SITE_ROOT/cmd_server nginx -t
 	$SITE_ROOT/cmd_server start all
 	return $is_loading
-}
-
-_update_repos() {
-	_repo
-	_update_sources $REPOS
-	_st_repo=$?
-	return $_st_repo
 }
 
 _register_node() {
@@ -664,6 +579,7 @@ _update_docker() {
 
 	$MBR node nodeinfo
 
+	if [ -n "$DOMAIN" ]; then $MBR node set DOMAIN "$DOMAIN"; fi
 	if [ -n "$ZONE" ]; then $MBR node set ZONE "$ZONE"; fi
 	if [ -n "$ID" ]; then $MBR node set ID "$ID"; fi
 	if [ -n "$USER_ID" ]; then $MBR node set USER_ID "$USER_ID"; fi
@@ -683,30 +599,15 @@ _update_docker() {
 _update() {
 
 	echo "Update"
-	echo $TYPE >$SITE_ROOT/vars/TYPE
-	mkdir -p $SITE_ROOT/logs/access $SITE_ROOT/logs/error
+	_save_env
 
-	_repo
+	_prepare
 
-	if [ -n "$MBR_ENV" ]; then
-		cat >$SITE_ROOT/.env <<EOF
-export GIT_PUBLIC_URL="https://github.com"
-export MBR_ENV=${MBR_ENV}
-EOF
-		cp $SITE_ROOT/.env $SITE_ROOT/.env_raw
-	fi
-
-	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	fi
 	if [ "$MBR_MODE" == "docker" ]; then
 		_update_docker 2>&1 >>$log_install
 	fi
 
 	_st_update=0
-
-	_update_repos
-	_st_update=$?
 
 	_load_config
 
@@ -727,23 +628,13 @@ _monitor() {
 		$0 _reload
 	fi
 
-	# cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
-	# supervisorctl update
 	echo $(date +%s) >/tmp/mbr_monitor_updated
 
-	# $curl $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
-	# if [ $? -eq 0 ]; then
-	# 	if [ ! -f "/tmp/version.old" ]; then touch /tmp/version.old; fi
-	# 	diff -s /tmp/version.new /tmp/version.old
-	# 	if [ $? -eq 0 ]; then
-	# 		echo $0 _reload
-	# 	fi
-	# 	mv /tmp/version.new /tmp/version.old
-	# fi
 }
 
 _run() {
 	rm -rf $SITE_ROOT/tmp/*
+	_prepare
 	$SITE_ROOT/start_server
 }
 
