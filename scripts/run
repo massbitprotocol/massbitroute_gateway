@@ -6,8 +6,7 @@ mkdir -p $SITE_ROOT
 export DEBIAN_FRONTEND=noninteractive
 export HOME=$SITE_ROOT
 curl="/usr/bin/curl -skSfL"
-if [ -e "$SITE_ROOT/cmd_server" ]; then bash $SITE_ROOT/cmd_server _env; fi
-if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw >/dev/null; fi
+diff="diff -s"
 
 source $SITE_ROOT/scripts/base.sh >/dev/null
 cd $SITE_ROOT
@@ -27,22 +26,19 @@ else
 fi
 
 _repo() {
-	if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
-
 	if [ -z "$MBR_ENV" ]; then
-		echo "MBR_ENV not defined"
+		echo "MBR_ENV missing"
 		exit 1
-	else
-		if [ -f "$SITE_ROOT/.env.$MBR_ENV" ]; then source $SITE_ROOT/.env.$MBR_ENV >/dev/null; fi
 	fi
-	REPOS="$mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git \
-$SITE_ROOT|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_${TYPE}.git \
-$service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MBR_ENV"
+	if [ -z "$GIT_PUBLIC_URL" ]; then
+		echo "GIT_PUBLIC_URL missing"
+		exit 1
+	fi
+	REPOS="\
+
+"
+
 }
-
-_repo
-
-diff="diff -s"
 
 _debug() {
 	timeout 30 $SITE_ROOT/scripts/debug.sh
@@ -86,21 +82,6 @@ $SITE_ROOT/logs/*.log {
 EOF
 }
 
-_add_host_file() {
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	if [ ! -f "/etc/hosts.bk" ]; then
-		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
-	fi
-	sed '/</d' /etc/hosts -i /etc/hosts.bk
-	cat /etc/hosts.bk >/tmp/hosts
-	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
-	if [ -f "/tmp/hosts.1" ]; then
-		cat /tmp/hosts.1 >>/tmp/hosts
-		cat /tmp/hosts >/etc/hosts
-		rm /tmp/hosts.1
-	fi
-}
-
 _supervisor() {
 	ln -sf /massbit/massbitroute/app/gbc /massbit/massbitroute/app/src/gbc
 	ln -sf /massbit/massbitroute/app/gbc/bin/openresty /usr/local/openresty
@@ -117,12 +98,12 @@ _supervisor() {
 		supervisorctl update
 	fi
 }
-_install() {
-	_init >>$log_install
-	_prepare >>$log_install
-	_install_repos >>$log_install
-	_supervisor >>$log_install
-}
+# _install() {
+# 	# _init >>$log_install
+# 	_prepare >>$log_install
+# 	_install_repos >>$log_install
+# 	_supervisor >>$log_install
+# }
 
 _load_config() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
@@ -149,85 +130,84 @@ _load_config() {
 	$SITE_ROOT/cmd_server start all
 	return $is_reloading
 }
-_add_host_file() {
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	if [ ! -f "/etc/hosts.bk" ]; then
-		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
-	fi
-	sed '/</d' /etc/hosts -i /etc/hosts.bk
-	cat /etc/hosts.bk >/tmp/hosts
-	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
-	if [ -f "/tmp/hosts.1" ]; then
-		cat /tmp/hosts.1 >>/tmp/hosts
-		cat /tmp/hosts >/etc/hosts
-		rm /tmp/hosts.1
-	fi
-}
+# _add_host_file() {
+# 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+# 	if [ ! -f "/etc/hosts.bk" ]; then
+# 		sed '/.mbr/d' /etc/hosts >/etc/hosts.bk
+# 	fi
+# 	sed '/</d' /etc/hosts -i /etc/hosts.bk
+# 	cat /etc/hosts.bk >/tmp/hosts
+# 	$curl $PORTAL_URL/deploy/info/hosts -o /tmp/hosts.1
+# 	if [ -f "/tmp/hosts.1" ]; then
+# 		cat /tmp/hosts.1 >>/tmp/hosts
+# 		cat /tmp/hosts >/etc/hosts
+# 		rm /tmp/hosts.1
+# 	fi
+# }
 
 _reload() {
 
-	mkdir -p $SITE_ROOT/data/geoip
-	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-		# apt update
-		# apt-get install -y xz-utils
-		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	fi
-
-	_maintain
-
-	id=$(cat $SITE_ROOT/vars/ID)
-	# _sc=$(mktemp)
-	# curl -sk $PORTAL_URL/deploy/info/debug/$TYPE/${id} -o $_sc >/dev/null
-	# if [ $? -eq 0 ]; then
-	# 	echo "Script path:$_sc" | tee -a $debug_log
-	# 	bash $_sc $SITE_ROOT | tee -a $debug_log
+	# mkdir -p $SITE_ROOT/data/geoip
+	# if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
+	# 	# apt update
+	# 	# apt-get install -y xz-utils
+	# 	tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
 	# fi
 
-	# rm $_sc
-	# _add_host_file
-	if [ ! -L "/etc/letsencrypt" ]; then
-		rm -rf /etc/letsencrypt
-		ln -sf /massbit/massbitroute/app/src/sites/services/gateway/ssl /etc/letsencrypt
-	fi
+	# _maintain
 
-	_tune
+	# id=$(cat $SITE_ROOT/vars/ID)
+	# # _sc=$(mktemp)
+	# # curl -sk $PORTAL_URL/deploy/info/debug/$TYPE/${id} -o $_sc >/dev/null
+	# # if [ $? -eq 0 ]; then
+	# # 	echo "Script path:$_sc" | tee -a $debug_log
+	# # 	bash $_sc $SITE_ROOT | tee -a $debug_log
+	# # fi
 
-	if [ -f "/usr/bin/systemctl" ]; then
-		systemctl | awk '/apt/{print $1}' | while read _s; do
-			systemctl stop $_s
-			systemctl disable $_s
-		done
-	fi
+	# # rm $_sc
+	# # _add_host_file
+	# if [ ! -L "/etc/letsencrypt" ]; then
+	# 	rm -rf /etc/letsencrypt
+	# 	ln -sf /massbit/massbitroute/app/src/sites/services/gateway/ssl /etc/letsencrypt
+	# fi
+
+	# _tune
+
+	# if [ -f "/usr/bin/systemctl" ]; then
+	# 	systemctl | awk '/apt/{print $1}' | while read _s; do
+	# 		systemctl stop $_s
+	# 		systemctl disable $_s
+	# 	done
+	# fi
 	pkill -f push.py
-	pkill -f push.sh
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
 
-	chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
-	nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
-	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
+	# chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
+	# nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
+	# msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
 
-	st=$?
-	echo $st nginx_check - "$msg" >/tmp/nginx_check
+	# st=$?
+	# echo $st nginx_check - "$msg" >/tmp/nginx_check
 
-	grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
-	if [ $? -eq 0 ]; then
-		rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
-		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-		msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
+	# grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
+	# if [ $? -eq 0 ]; then
+	# 	rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
+	# 	tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
+	# 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
 
-		st=$?
-		echo $st nginx_check - "$msg" >/tmp/nginx_check
+	# 	st=$?
+	# 	echo $st nginx_check - "$msg" >/tmp/nginx_check
 
-	fi
+	# fi
 
 	#_debug
 }
 
-_init() {
-	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
-}
+# _init() {
+# 	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
+# }
 
 _prepare() {
 	echo "Prepare"
@@ -243,20 +223,22 @@ _prepare() {
 
 }
 _install_repos() {
-	_git_config
+	if [ -z "$MBR_ENV" ]; then
+		echo "MBR_ENV missing"
+		exit 1
+	fi
 	_repo
-	for _pathgit in $REPOS; do
-		_path=$(echo $_pathgit | cut -d'|' -f1)
-		_url=$(echo $_pathgit | cut -d'|' -f2)
-		_branch=$(echo $_pathgit | cut -d'|' -f3)
-		_git_clone $_url $_path $_branch
-	done
+	_install_sources $REPOS
+	_install_status=$?
+	return $_install_status
 }
 
+_install_one() {
+	_prepare
+	_install_repos
+}
 _install() {
-	_init >>$log_install
-	_prepare >>$log_install
-	_install_repos >>$log_install
+	_install_one >>$log_install
 	_supervisor >>$log_install
 }
 
@@ -608,13 +590,6 @@ _load_config() {
 	return $is_loading
 }
 
-_update_repos() {
-	_repo
-	_update_sources $REPOS
-	_st_repo=$?
-	return $_st_repo
-}
-
 _register_node() {
 	SCRIPTS_RUN="$SITE_ROOT/scripts/run"
 	MBR=$SITE_ROOT/mbr
@@ -683,22 +658,23 @@ _update_docker() {
 _update() {
 
 	echo "Update"
-	echo $TYPE >$SITE_ROOT/vars/TYPE
-	mkdir -p $SITE_ROOT/logs/access $SITE_ROOT/logs/error
+	_prepare
+	# 	echo $TYPE >$SITE_ROOT/vars/TYPE
+	# 	mkdir -p $SITE_ROOT/logs/access $SITE_ROOT/logs/error
 
-	_repo
+	# 	_repo
 
-	if [ -n "$MBR_ENV" ]; then
-		cat >$SITE_ROOT/.env <<EOF
-export GIT_PUBLIC_URL="https://github.com"
-export MBR_ENV=${MBR_ENV}
-EOF
-		cp $SITE_ROOT/.env $SITE_ROOT/.env_raw
-	fi
+	# 	if [ -n "$MBR_ENV" ]; then
+	# 		cat >$SITE_ROOT/.env <<EOF
+	# export GIT_PUBLIC_URL="https://github.com"
+	# export MBR_ENV=${MBR_ENV}
+	# EOF
+	# 		cp $SITE_ROOT/.env $SITE_ROOT/.env_raw
+	# 	fi
 
-	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	fi
+	# 	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
+	# 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
+	# 	fi
 	if [ "$MBR_MODE" == "docker" ]; then
 		_update_docker 2>&1 >>$log_install
 	fi
