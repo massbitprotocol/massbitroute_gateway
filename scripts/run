@@ -107,41 +107,7 @@ _supervisor() {
 		supervisorctl update
 	fi
 }
-# _install() {
-# 	# _init >>$log_install
-# 	_prepare >>$log_install
-# 	_install_repos >>$log_install
-# 	_supervisor >>$log_install
-# }
 
-_load_config() {
-	is_reloading=0
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	id=$(cat $SITE_ROOT/vars/ID)
-	user_id=$(cat $SITE_ROOT/vars/USER_ID)
-
-	mkdir -p $SITE_ROOT/http.d
-	# $SITE_ROOT/mbr node nodeinfo
-
-	if [ -z "$id" ]; then return $is_reloading; fi
-
-	echo $curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
-	$curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
-	if [ ! -f "http.d/${id}.conf" ]; then
-		touch http.d/${id}.conf
-	fi
-
-	diff -s http.d/${id}.conf http.d/${id}.conf.new
-	if [ $? -ne 0 ]; then
-		mv http.d/${id}.conf.new http.d/${id}.conf
-		is_reloading=1
-	fi
-	sed "s/__NODE_ID__/$id/g" etc/node.conf >http.d/node.conf0
-	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/node.conf0
-
-	$SITE_ROOT/cmd_server start all
-	return $is_reloading
-}
 # _add_host_file() {
 # 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
 # 	if [ ! -f "/etc/hosts.bk" ]; then
@@ -159,67 +125,12 @@ _load_config() {
 
 _reload() {
 
-	# mkdir -p $SITE_ROOT/data/geoip
-	# if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-	# 	# apt update
-	# 	# apt-get install -y xz-utils
-	# 	tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	# fi
-
-	# _maintain
-
-	# id=$(cat $SITE_ROOT/vars/ID)
-	# # _sc=$(mktemp)
-	# # curl -sk $PORTAL_URL/deploy/info/debug/$TYPE/${id} -o $_sc >/dev/null
-	# # if [ $? -eq 0 ]; then
-	# # 	echo "Script path:$_sc" | tee -a $debug_log
-	# # 	bash $_sc $SITE_ROOT | tee -a $debug_log
-	# # fi
-
-	# # rm $_sc
-	# # _add_host_file
-	# if [ ! -L "/etc/letsencrypt" ]; then
-	# 	rm -rf /etc/letsencrypt
-	# 	ln -sf /massbit/massbitroute/app/src/sites/services/gateway/ssl /etc/letsencrypt
-	# fi
-
-	# _tune
-
-	# if [ -f "/usr/bin/systemctl" ]; then
-	# 	systemctl | awk '/apt/{print $1}' | while read _s; do
-	# 		systemctl stop $_s
-	# 		systemctl disable $_s
-	# 	done
-	# fi
 	pkill -f push.py
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
 
-	# chmod +x $SITE_ROOT/bin/openresty/nginx/sbin/nginx
-	# nginx="$SITE_ROOT/bin/openresty/nginx/sbin/nginx -c $SITE_ROOT/tmp/nginx.conf"
-	# msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-
-	# st=$?
-	# echo $st nginx_check - "$msg" >/tmp/nginx_check
-
-	# grep "The MaxMind DB file contains invalid metadata" /tmp/nginx_check >/dev/null
-	# if [ $? -eq 0 ]; then
-	# 	rm $SITE_ROOT/data/geoip/GeoIP2-City.mmdb
-	# 	tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	# 	msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
-
-	# 	st=$?
-	# 	echo $st nginx_check - "$msg" >/tmp/nginx_check
-
-	# fi
-
-	#_debug
 }
-
-# _init() {
-# 	_git_clone $GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc.git /massbit/massbitroute/app/gbc
-# }
 
 _prepare() {
 	echo "Prepare"
@@ -532,6 +443,18 @@ _load_config() {
 	network=$(cat $SITE_ROOT/vars/NETWORK)
 	if [ -z "$network" ]; then return $is_loading; fi
 
+	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
+	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
+	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
+	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
+	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
+
+	sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
+	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf9
+	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
+	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
+	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
+
 	continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
 	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 
@@ -559,17 +482,17 @@ _load_config() {
 
 	_optimize_upstream $blockchain $network $id $continent $country
 
-	sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
-	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
-	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
-	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
-	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
+	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
+	# sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
+	# sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf0
+	# sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf0
+	# sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf0
 
-	sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
-	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf9
-	sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
-	sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
-	sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
+	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway9.conf >http.d/gateway.conf9
+	# sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf9
+	# sed -i "s/__BLOCKCHAIN__/$blockchain/g" http.d/gateway.conf9
+	# sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
+	# sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
 
 	blnet=${blockchain}-${network}
 	conf=http.d/gw-${blnet}
