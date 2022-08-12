@@ -19,25 +19,37 @@ debug_log=$SITE_ROOT/logs/debug.log
 
 export GIT_PUBLIC_URL="https://github.com"
 
-if [ -f "$SITE_ROOT/vars/USER_ID" ]; then
-	user_id=$(cat $SITE_ROOT/vars/USER_ID)
-else
-	user_id=1
-fi
+# if [ -f "$SITE_ROOT/vars/USER_ID" ]; then
+# 	user_id=$(cat $SITE_ROOT/vars/USER_ID)
+# else
+# 	user_id=1
+# fi
 
-_repo() {
+_save_env() {
 	if [ -z "$MBR_ENV" ]; then
 		echo "MBR_ENV missing"
 		exit 1
 	fi
-	if [ -z "$GIT_PUBLIC_URL" ]; then
-		echo "GIT_PUBLIC_URL missing"
+
+	if [ -z "$PORTAL_URL" ]; then
+		echo "PORTAL_URL missing"
 		exit 1
+	else
+		echo $PORTAL_URL >$SITE_ROOT/vars/PORTAL_URL
 	fi
-	REPOS="\
-
-"
-
+	if [ -z "$DOMAIN" ]; then
+		DOMAIN=$(echo $PORTAL_URL | cut -d'.' -f2-)
+	fi
+	if [ -z "$DOMAIN" ]; then
+		echo "DOMAIN missing"
+		exit 1
+	else
+		echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
+	fi
+}
+_repo() {
+	_save_env
+	REPOS=""
 }
 
 _debug() {
@@ -106,11 +118,14 @@ _supervisor() {
 # }
 
 _load_config() {
+	is_reloading=0
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+	id=$(cat $SITE_ROOT/vars/ID)
+	user_id=$(cat $SITE_ROOT/vars/USER_ID)
+
 	mkdir -p $SITE_ROOT/http.d
 	# $SITE_ROOT/mbr node nodeinfo
-	is_reloading=0
-	id=$(cat $SITE_ROOT/vars/ID)
+
 	if [ -z "$id" ]; then return $is_reloading; fi
 
 	echo $curl $PORTAL_URL/deploy/${TYPE}conf/${id}.conf -o http.d/${id}.conf.new >/dev/null
@@ -358,6 +373,7 @@ _optimize_upstream() {
 }
 _update_network() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+
 	blockchain=$1
 	network=$2
 	id=$3
@@ -508,8 +524,10 @@ _load_config() {
 
 	is_loading=0
 	id=$(cat $SITE_ROOT/vars/ID)
+	user_id=$(cat $SITE_ROOT/vars/USER_ID)
 
 	if [ -z "$id" ]; then return $is_loading; fi
+	if [ -z "$user_id" ]; then return $is_loading; fi
 
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	if [ -z "$blockchain" ]; then return $is_loading; fi
@@ -521,17 +539,19 @@ _load_config() {
 	country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 
 	if [ \( -z "$continent" \) -o \( "$continent" == "null" \) ]; then
-		continent=""
-		$SITE_ROOT/mbr node nodeinfo
-		continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
-		country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+		return
+		# continent=""
+		# $SITE_ROOT/mbr node nodeinfo
+		# continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+		# country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 
 	fi
 	if [ \( -z "$country" \) -o \( "$country" == "null" \) ]; then
-		country=""
-		$SITE_ROOT/mbr node nodeinfo
-		continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
-		country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
+		return
+		# country=""
+		# $SITE_ROOT/mbr node nodeinfo
+		# continent=$(cat $SITE_ROOT/vars/RAW | jq .geo.continentCode | sed 's/"//g')
+		# country=$(cat $SITE_ROOT/vars/RAW | jq .geo.countryCode | sed 's/"//g')
 	fi
 
 	_update_network $blockchain $network $id $continent $country
@@ -658,6 +678,8 @@ _update_docker() {
 _update() {
 
 	echo "Update"
+	_save_env
+
 	_prepare
 	# 	echo $TYPE >$SITE_ROOT/vars/TYPE
 	# 	mkdir -p $SITE_ROOT/logs/access $SITE_ROOT/logs/error
@@ -720,6 +742,7 @@ _monitor() {
 
 _run() {
 	rm -rf $SITE_ROOT/tmp/*
+	_prepare
 	$SITE_ROOT/start_server
 }
 
