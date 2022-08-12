@@ -19,12 +19,6 @@ debug_log=$SITE_ROOT/logs/debug.log
 
 export GIT_PUBLIC_URL="https://github.com"
 
-# if [ -f "$SITE_ROOT/vars/USER_ID" ]; then
-# 	user_id=$(cat $SITE_ROOT/vars/USER_ID)
-# else
-# 	user_id=1
-# fi
-
 _save_env() {
 	if [ -z "$MBR_ENV" ]; then
 		echo "MBR_ENV missing"
@@ -685,30 +679,12 @@ _update() {
 	_save_env
 
 	_prepare
-	# 	echo $TYPE >$SITE_ROOT/vars/TYPE
-	# 	mkdir -p $SITE_ROOT/logs/access $SITE_ROOT/logs/error
 
-	# 	_repo
-
-	# 	if [ -n "$MBR_ENV" ]; then
-	# 		cat >$SITE_ROOT/.env <<EOF
-	# export GIT_PUBLIC_URL="https://github.com"
-	# export MBR_ENV=${MBR_ENV}
-	# EOF
-	# 		cp $SITE_ROOT/.env $SITE_ROOT/.env_raw
-	# 	fi
-
-	# 	if [ ! -f "$SITE_ROOT/data/geoip/GeoIP2-City.mmdb" ]; then
-	# 		tar -xvJf $SITE_ROOT/data/geoip/GeoIP2-City.mmdb.tar.xz -C $SITE_ROOT/data/geoip
-	# 	fi
 	if [ "$MBR_MODE" == "docker" ]; then
 		_update_docker 2>&1 >>$log_install
 	fi
 
 	_st_update=0
-
-	# _update_repos
-	# _st_update=$?
 
 	_load_config
 
@@ -729,19 +705,8 @@ _monitor() {
 		$0 _reload
 	fi
 
-	# cp supervisor.conf /etc/supervisor/conf.d/${TYPE}.conf
-	# supervisorctl update
 	echo $(date +%s) >/tmp/mbr_monitor_updated
 
-	# $curl $PORTAL_URL/deploy/version/apideploy.version -o /tmp/version.new
-	# if [ $? -eq 0 ]; then
-	# 	if [ ! -f "/tmp/version.old" ]; then touch /tmp/version.old; fi
-	# 	diff -s /tmp/version.new /tmp/version.old
-	# 	if [ $? -eq 0 ]; then
-	# 		echo $0 _reload
-	# 	fi
-	# 	mv /tmp/version.new /tmp/version.old
-	# fi
 }
 
 _run() {
