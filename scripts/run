@@ -272,9 +272,9 @@ _optimize_upstream_file() {
 		_node_scores=$_node_scores1
 	fi
 	awk '{gsub(/unix:\/tmp\//,"",$2);gsub(/.sock/,"",$2);print $2;}' $_fstream | sort >$_node_ids
-	cat $_node_ids
-	cat $_node_monitor
-	cat $_node_scores
+	# cat $_node_ids
+	# cat $_node_monitor
+	# cat $_node_scores
 	join -j 1 -o 1.1,2.2 $_node_ids $_node_monitor | sort -k2 -nr >$_node_scores
 	cat $_node_scores
 	echo >>$_node_scores
@@ -328,14 +328,14 @@ _optimize_upstream_geo() {
 		fi
 	fi
 
-	echo "Upstream country"
-	cat $_upstream_country
+	# echo "Upstream country"
+	# cat $_upstream_country
 
-	echo "Upstream continent"
-	cat $_upstream_continent
+	# echo "Upstream continent"
+	# cat $_upstream_continent
 
-	echo "Upstream other"
-	cat $_upstream_other
+	# echo "Upstream other"
+	# cat $_upstream_other
 
 	rm $_upstream_continent $_upstream_country $_upstream_other
 
@@ -662,6 +662,7 @@ _update_docker() {
 
 	$MBR node nodeinfo
 
+	if [ -n "$DOMAIN" ]; then $MBR node set DOMAIN "$DOMAIN"; fi
 	if [ -n "$ZONE" ]; then $MBR node set ZONE "$ZONE"; fi
 	if [ -n "$ID" ]; then $MBR node set ID "$ID"; fi
 	if [ -n "$USER_ID" ]; then $MBR node set USER_ID "$USER_ID"; fi
