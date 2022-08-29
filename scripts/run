@@ -261,8 +261,8 @@ _optimize_upstream() {
 	node_monitor=$SITE_ROOT/logs/node_monitor
 	node_scores=$SITE_ROOT/logs/node_scores
 	_tmp1=$(mktemp)
-	echo $curl https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1
-	timeout 30 $curl https://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1 >/dev/null
+	echo $curl http://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1
+	timeout 30 $curl http://${TYPE}-${blockchain}-${network}.monitor.mbr.${DOMAIN}/_stat/$TYPE/$blockchain/$network/$id/mbr-node -o $_tmp1 >/dev/null
 	if [ $? -ne 0 ]; then return $_reload; fi
 	cat $_tmp1 | sort -k1 >$node_monitor
 	rm $_tmp1
