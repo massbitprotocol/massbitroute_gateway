@@ -2,31 +2,42 @@ local cjson = require("cjson")
 local set_var = ndk.set_var
 
 local env = require("env")
-local domain = env.DOMAIN or "massbitroute.com"
+local domain
+local session_enable
+local scheme = ngx.var.scheme
+if env then
+    domain = env.DOMAIN or "massbitroute.com"
+    session_enable = env.SESSION_ENABLE
+end
+
+-- local domain = env.DOMAIN or "massbitroute.com"
 
 local function empty(s)
     return s == nil or s == ""
 end
 
--- if empty(ngx.var.arg_session) then
---     ngx.header.location =
---         "https://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
+if session_enable then
+    if empty(ngx.var.arg_session) then
+        ngx.header.location =
+            scheme .. "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
 
---     return ngx.exit(308)
--- else
---     local _session = ngx.var.arg_session
---     ngx.log(ngx.ERR, "session:" .. _session)
---     local _token = set_var.set_decode_base32(_session)
---     ngx.log(ngx.ERR, "token:" .. _token)
---     local token = set_var.set_decrypt_session(_token)
---     ngx.log(ngx.ERR, "token real:" .. token)
---     ngx.log(ngx.ERR, "token arg:" .. ngx.var.mbr_token)
---     if not token or token ~= ngx.var.mbr_token then
---         ngx.header.location =
---             "https://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
---         return ngx.exit(308)
---     end
--- end
+        return ngx.exit(308)
+    else
+        local _session = ngx.var.arg_session
+        ngx.log(ngx.ERR, "session:" .. _session)
+        local _token = set_var.set_decode_base32(_session)
+        ngx.log(ngx.ERR, "token:" .. _token)
+        local token = set_var.set_decrypt_session(_token)
+        ngx.log(ngx.ERR, "token real:" .. token)
+        ngx.log(ngx.ERR, "token arg:" .. ngx.var.mbr_token)
+        if not token or token ~= ngx.var.mbr_token then
+            ngx.header.location =
+                scheme ..
+                "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
+            return ngx.exit(308)
+        end
+    end
+end
 
 local function split(s)
     local res = {}
