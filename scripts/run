@@ -645,6 +645,7 @@ _monitor() {
 
 _run() {
 	rm -rf $SITE_ROOT/tmp/*
+	_save_env
 	_prepare
 	$SITE_ROOT/start_server
 }
