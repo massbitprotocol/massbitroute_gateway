@@ -34,6 +34,11 @@ _save_env() {
 	if [ -z "$DOMAIN" ]; then
 		DOMAIN=$(echo $PORTAL_URL | cut -d'.' -f2-)
 	fi
+
+	if [ -z "$SESSION_ENABLE" ]; then
+		export SESSION_ENABLE=""
+	fi
+
 	if [ -z "$DOMAIN" ]; then
 		echo "DOMAIN missing"
 		exit 1
@@ -41,7 +46,8 @@ _save_env() {
 		echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
 		cat >$SITE_ROOT/src/env.lua <<EOF
 return {
-["DOMAIN"] = "$DOMAIN"
+["DOMAIN"] = "$DOMAIN",
+["SESSION_ENABLE"] = "$SESSION_ENABLE"
 }
 EOF
 	fi
