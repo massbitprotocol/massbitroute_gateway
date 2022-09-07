@@ -2,6 +2,10 @@ local cjson = require("cjson")
 local set_var = ndk.set_var
 
 local env = require("env")
+local method_ttl_default = 2
+local method_ttl = {
+    ["eth_getBlockByNumber"] = 6
+}
 local domain
 local session_enable
 local scheme = ngx.var.scheme
@@ -101,6 +105,7 @@ if version ~= "2.0" then
 end
 
 ngx.var["api_method"] = method
+ngx.var["api_method_ttl"] = method_ttl[method] or method_ttl_default
 
 -- if whitelist is configured, check that the method is whitelisted
 if whitelist ~= nil then
