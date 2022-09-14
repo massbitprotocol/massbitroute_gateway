@@ -5,6 +5,12 @@ local function empty(s)
 end
 -- get request content
 ngx.req.read_body()
+if not ngx.var.request_body then
+    ngx.log(ngx.ERR, "no method and/or jsonrpc attribute")
+    ngx.exit(ngx.HTTP_BAD_REQUEST)
+    return
+end
+ngx.log(ngx.ERR, ngx.var.request_body)
 
 -- try to parse the body as JSON
 local success, body = pcall(cjson.decode, ngx.var.request_body)
