@@ -20,6 +20,7 @@ debug_log=$SITE_ROOT/logs/debug.log
 export GIT_PUBLIC_URL="https://github.com"
 
 _save_env() {
+
 	if [ -z "$SESSION_ENABLE" ]; then
 		export SESSION_ENABLE=""
 	fi
@@ -84,7 +85,6 @@ _repo() {
 	fi
 	REPOS=""
 }
-
 _debug() {
 	timeout 30 $SITE_ROOT/scripts/debug.sh
 }
