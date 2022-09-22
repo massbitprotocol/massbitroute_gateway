@@ -638,6 +638,13 @@ _update_docker() {
 	fi
 }
 
+_update_ssl() {
+	mkdir -p $SITE_ROOT/ssl
+	cd $SITE_ROOT/ssl
+	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+	$curl $PORTAL_URL/deploy/_ssl/gateway_ssl.tar.gz gateway_ssl.tar.gz
+	tar xvzf gateway_ssl.tar.gz
+}
 _update() {
 
 	echo "Update"
@@ -649,6 +656,7 @@ _update() {
 		_update_docker 2>&1 >>$log_install
 	fi
 
+	_update_ssl
 	_st_update=0
 
 	_load_config
