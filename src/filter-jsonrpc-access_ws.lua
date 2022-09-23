@@ -4,7 +4,7 @@ local set_var = ndk.set_var
 local env = require("env")
 local domain
 local session_enable
-local scheme = "http" -- ngx.var.scheme
+local scheme = ngx.var.scheme
 if env then
     domain = env.DOMAIN or "massbitroute.com"
     session_enable = env.SESSION_ENABLE
@@ -19,7 +19,7 @@ end
 if session_enable then
     if empty(ngx.var.arg_session) then
         ngx.header.location =
-            scheme .. "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
+            "http" .. "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
 
         return ngx.exit(308)
     else
