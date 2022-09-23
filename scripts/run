@@ -644,6 +644,7 @@ _update_ssl() {
 	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
 	$curl $PORTAL_URL/deploy/_ssl/gateway_ssl.tar.gz -o gateway_ssl.tar.gz
 	tar xvzf gateway_ssl.tar.gz
+	cd -
 }
 _update() {
 
