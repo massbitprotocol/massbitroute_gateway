@@ -30,7 +30,7 @@ if session_enable then
         ngx.log(ngx.ERR, "token arg:" .. ngx.var.mbr_token)
         if not token or token ~= ngx.var.mbr_token then
             ngx.header.location =
-                scheme ..
+                "http" ..
                 "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
             return ngx.exit(308)
         end
