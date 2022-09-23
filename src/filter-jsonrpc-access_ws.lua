@@ -19,7 +19,7 @@ end
 if session_enable then
     if empty(ngx.var.arg_session) then
         ngx.header.location =
-            scheme .. "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
+            "http" .. "://session.mbr." .. domain .. "/api/v1?host=" .. ngx.var.host .. "&token=" .. ngx.var.mbr_token
 
         return ngx.exit(308)
     else
