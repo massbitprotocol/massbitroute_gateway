@@ -2,7 +2,8 @@ local cjson = require("cjson")
 
 local method_ttl_default = 2
 local method_ttl = {
-    ["eth_getBlockByNumber"] = 6
+    ["eth_getBlockByNumber"] = 6,
+    ["eth_blockNumber"] = 6
 }
 
 local function empty(s)
