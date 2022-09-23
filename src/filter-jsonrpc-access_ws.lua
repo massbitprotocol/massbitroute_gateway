@@ -4,7 +4,7 @@ local set_var = ndk.set_var
 local env = require("env")
 local domain
 local session_enable
-local scheme = ngx.var.scheme
+local scheme = "http" -- ngx.var.scheme
 if env then
     domain = env.DOMAIN or "massbitroute.com"
     session_enable = env.SESSION_ENABLE
