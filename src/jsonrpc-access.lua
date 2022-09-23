@@ -1,5 +1,11 @@
 local cjson = require("cjson")
 
+local method_ttl_default = 2
+local method_ttl = {
+    ["eth_getBlockByNumber"] = 6,
+    ["eth_blockNumber"] = 6
+}
+
 local function empty(s)
     return s == nil or s == ""
 end
@@ -32,3 +38,4 @@ if version ~= "2.0" then
 end
 
 ngx.var["api_method"] = method
+ngx.var["api_method_ttl"] = method_ttl[method] or method_ttl_default
