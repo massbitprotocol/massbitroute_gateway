@@ -457,6 +457,10 @@ _update_network() {
 
 	return $_reload
 }
+_repo_update() {
+	git -C $service_dir/mkagent pull
+	git -C $mbr_root/gbc pull
+}
 _load_config() {
 	if [ ! -f "$SITE_ROOT/vars/RAW" ]; then
 		$SITE_ROOT/mbr node nodeinfo
@@ -680,6 +684,8 @@ _update() {
 	_save_env
 
 	_prepare
+
+	_repo_update
 
 	if [ "$MBR_MODE" == "docker" ]; then
 		_update_docker 2>&1 >>$log_install
