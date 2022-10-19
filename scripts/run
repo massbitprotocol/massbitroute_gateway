@@ -8,6 +8,7 @@ export HOME=$SITE_ROOT
 curl="/usr/bin/curl -skSfL"
 diff="diff -s"
 
+source $SITE_ROOT/env/env.sh
 source $SITE_ROOT/scripts/base.sh >/dev/null
 cd $SITE_ROOT
 
