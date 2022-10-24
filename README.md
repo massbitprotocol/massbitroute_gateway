@@ -2,6 +2,30 @@
 
 Component used for routing traffic to backend providers
 
+## Install with docker
+```
+ services:
+  gateway:
+    privileged: true
+    restart: unless-stopped
+    image: massbit/massbitroute_gateway:_BRANCH_
+    build:
+      context: /massbit/massbitroute/app/src
+      dockerfile: install/mbr/build/gateway/Dockerfile
+      args:
+        GIT_PUBLIC_URL: https://github.com                        
+        #MYAPP_IMAGE: massbit/massbitroute_basenode:_BRANCH_                
+        BRANCH: _BRANCH_
+    container_name: mbr_gateway
+    environment:
+      - MBR_ENV=_BRANCH_                                               # Git Tag version deployment of Api repo
+      - MKAGENT_BRANCH=_BRANCH_                                        # Git Tag version deployment of Monitor client		
+      - INSTALL_CMD=https://portal.massbitroute.net/api/v1/gateway_install?id=89f24596-8087-4406-87a4-aec47ff2b4d7&user_id=b363ddf4-42cf-4ccf-89c2-8c42c531ac99&blockchain=eth&network=mainnet&zone=EU&app_key=LFyHE_WaDS6HiQuE6QqKSA&portal_url=https://portal.massbitroute.net&env=_BRANCH_
+      - DOMAIN=massbitroute.net
+      - PORTAL_URL=http://portal.massbitroute.net    # portal url	  
+    extra_hosts:
+      - "portal.massbitroute.net:127.0.0.1"
+	  ```
 ## Run with Docker
 
 examples

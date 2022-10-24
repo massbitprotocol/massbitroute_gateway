@@ -21,6 +21,7 @@ debug_log=$SITE_ROOT/logs/debug.log
 export GIT_PUBLIC_URL="https://github.com"
 
 _save_env() {
+
 	if [ -z "$SESSION_ENABLE" ]; then
 		export SESSION_ENABLE=""
 	fi
@@ -85,7 +86,6 @@ _repo() {
 	fi
 	REPOS=""
 }
-
 _debug() {
 	timeout 30 $SITE_ROOT/scripts/debug.sh
 }
@@ -651,6 +651,7 @@ _update_ssl() {
 	tar xvzf gateway_ssl.tar.gz
 	cd -
 }
+
 _update_tag() {
 	DOMAIN=$(cat $SITE_ROOT/vars/DOMAIN)
 	PORTAL_DOMAIN=portal.$DOMAIN
