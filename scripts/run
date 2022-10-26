@@ -731,7 +731,7 @@ _service_promtail() {
 	type=$(cat $SITE_ROOT/vars/TYPE)
 	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	network=$(cat $SITE_ROOT/vars/NETWORK)
-	PROMTOOL=$SITE_ROOT/promtool/promtool
+	PROMTOOL=$SITE_ROOT/promtool/promtail
 	mkdir -p $SITE_ROOT/data/promtool
 	sed "s/_SITE_ROOT_/$SITE_ROOT1/g" $SITE_ROOT/promtool/config_tmpl.yaml >$SITE_ROOT/promtool/config.yaml
 	sed "s/_LOKI_URL_/http\:\/\/${type}-${blockchain}-${network}.explorer.mbr.$DOMAIN/g" -i $SITE_ROOT/promtool/config.yaml
