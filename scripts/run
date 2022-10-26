@@ -734,8 +734,8 @@ _service_promtail() {
 	PROMTOOL=$SITE_ROOT/promtool/promtool
 	mkdir -p $SITE_ROOT/data/promtool
 	sed "s/_SITE_ROOT_/$SITE_ROOT1/g" $SITE_ROOT/promtool/config_tmpl.yaml >$SITE_ROOT/promtool/config.yaml
-	sed "s/_LOKI_URL_/http\:\/\/${type}-${blockchain}-${network}.explorer.mbr.$DOMAIN/g" $SITE_ROOT/promtool/config.yaml
-	sed "s/_LOKI_LOG_/$SITE_ROOT1\/logs\/access/g" $SITE_ROOT/promtool/config.yaml
+	sed "s/_LOKI_URL_/http\:\/\/${type}-${blockchain}-${network}.explorer.mbr.$DOMAIN/g" -i $SITE_ROOT/promtool/config.yaml
+	sed "s/_LOKI_LOG_/$SITE_ROOT1\/logs\/access/g" -i $SITE_ROOT/promtool/config.yaml
 	$PROMTOOL --config.file=$SITE_ROOT/promtool/config.yaml
 }
 
