@@ -1,0 +1,18 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: _SITE_ROOT_/data/promtail/positions.yaml
+
+clients:
+  - url: _LOKI_URL_/loki/api/v1/push
+
+scrape_configs:
+- job_name: system
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job: varlogs
+      __path__: _LOKI_LOG_/*log

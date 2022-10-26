@@ -1,6 +1,7 @@
 #!/bin/bash
 TYPE="gateway"
 SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
+SITE_ROOT1=$(echo $SITE_ROOT | sed 's/\//\\\//g')
 MBR=$SITE_ROOT/mbr
 mkdir -p $SITE_ROOT
 export DEBIAN_FRONTEND=noninteractive
@@ -722,6 +723,19 @@ _monitor() {
 
 	echo $(date +%s) >/tmp/mbr_monitor_updated
 
+}
+
+_service_promtail() {
+	DOMAIN=$(cat $SITE_ROOT/vars/DOMAIN)
+	type=$(cat $SITE_ROOT/vars/TYPE)
+	blockchain=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
+	network=$(cat $SITE_ROOT/vars/NETWORK)
+
+	mkdir -p $SITE_ROOT/data/promtail
+	sed "s/_SITE_ROOT_/$SITE_ROOT1/g" $SITE_ROOT/promtail/config_tmpl.yaml >$SITE_ROOT/promtail/config.yaml
+	sed "s/_LOKI_URL_/http\:\/\/${type}-${blockchain}-${network}.explorer.mbr.$DOMAIN/g" $SITE_ROOT/promtail/config_tmpl.yaml >$SITE_ROOT/promtail/config.yaml
+	sed "s/_LOKI_LOG_/$SITE_ROOT1\/logs\/access/g" $SITE_ROOT/promtail/config_tmpl.yaml >$SITE_ROOT/promtail/config.yaml
+	$PROMTAIL --config.file=$SITE_ROOT/promtail/config.yaml
 }
 
 _run() {

@@ -21,6 +21,15 @@ stdout_logfile=_SITE_ROOT_/../mkagent/logs/monitor_client.log
     ]]
     },
     supervisor = [[
+[program:gateway_promtail]
+command=/bin/bash _SITE_ROOT_/scripts/run loop _service_promtail _SITE_ROOT_ v1
+autostart=true
+autorestart=true
+redirect_stderr=true
+stopasgroup=true
+killasgroup=true
+stopsignal=INT
+stdout_logfile=_SITE_ROOT_/logs/gateway_promtail.log
 ]],
     supervisor1 = [[
 [program:fisherman]
