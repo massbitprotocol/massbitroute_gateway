@@ -23,9 +23,7 @@ export GIT_PUBLIC_URL="https://github.com"
 
 _save_env() {
 
-	if [ -z "$SESSION_ENABLE" ]; then
-		export SESSION_ENABLE=""
-	fi
+
 
 	if [ -n "$MBR_ENV" ]; then
 		echo $MBR_ENV >$SITE_ROOT/vars/MBR_ENV
@@ -67,13 +65,23 @@ _save_env() {
 		echo "DOMAIN missing"
 		exit 1
 	else
-		echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
-		cat >$SITE_ROOT/src/env.lua <<EOF
+	    echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
+	    if [ "$SESSION_ENABLE" == "true" ]; then
+				cat >$SITE_ROOT/src/env.lua <<EOF
 return {
 ["DOMAIN"] = "$DOMAIN",
-["SESSION_ENABLE"] = "$SESSION_ENABLE"
+["SESSION_ENABLE"] = true
 }
 EOF
+	    else
+		cat >$SITE_ROOT/src/env.lua <<EOF
+return {
+["DOMAIN"] = "$DOMAIN"
+}
+EOF
+		fi
+		
+
 	fi
 }
 _repo() {
