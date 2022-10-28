@@ -15,4 +15,4 @@ scrape_configs:
       - localhost
     labels:
       job: varlogs
-      __path__: _LOKI_LOG_/*log
+      __path__: _LOKI_LOG_/*_DOMAIN_.log
