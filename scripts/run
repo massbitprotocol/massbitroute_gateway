@@ -70,7 +70,7 @@ _save_env() {
 				cat >$SITE_ROOT/src/env.lua <<EOF
 return {
 ["DOMAIN"] = "$DOMAIN",
-["SESSION_ENABLE"] = true
+["SESSION_ENABLE"] = "true"
 }
 EOF
 	    else

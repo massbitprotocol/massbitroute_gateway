@@ -7,7 +7,7 @@ local session_enable
 local scheme = ngx.var.scheme
 if env then
     domain = env.DOMAIN or "massbitroute.com"
-    session_enable = env.SESSION_ENABLE
+    session_enable = env.SESSION_ENABLE == "true" and true or false
 end
 
 local function empty(s)
