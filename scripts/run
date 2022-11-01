@@ -751,8 +751,10 @@ _upgrade() {
 	if [ -z "$GBC_VERSION" ]; then echo "Missing GBC_VERSION"; fi
 	if [ -z "$OPENRESTY_VERSION" ]; then echo "Missing OPENRESTY_VERSION"; fi
 	git clone https://github.com/massbitprotocol/massbitroute_deploy_gbc.git -b $GBC_VERSION /root/.asdf/installs/gbc
+	git -C /root/.asdf/installs/gbc checkout $GBC_VERSION
 	ln -snf /root/.asdf/installs/gbc/$GBC_VERSION /usr/local/gbc
 	git clone https://github.com/massbitprotocol/massbitroute_deploy_openresty.git -b $OPENRESTY_VERSION /root/.asdf/installs/openresty
+	git -C /root/.asdf/installs/openresty checkout $OPENRESTY_VERSION
 	ln -snf /root/.asdf/installs/openresty/$OPENRESTY_VERSION /usr/local/openresty
 	mkdir -p /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site
 	cd /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site
@@ -761,8 +763,8 @@ _upgrade() {
 	ln -snf /usr/local/openresty/site /usr/local/site
 	cd /usr/local/gbc/bin/
 	ln -snf /usr/local/openresty .
-	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/lib  > /etc/ld.so.conf.d/0openresty.conf
-	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/luajit/lib  >> /etc/ld.so.conf.d/0openresty.conf
+	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/lib >/etc/ld.so.conf.d/0openresty.conf
+	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/luajit/lib >>/etc/ld.so.conf.d/0openresty.conf
 	ldconfig
 }
 _run() {
