@@ -751,9 +751,11 @@ _upgrade() {
 	if [ -z "$GBC_VERSION" ]; then echo "Missing GBC_VERSION"; fi
 	if [ -z "$OPENRESTY_VERSION" ]; then echo "Missing OPENRESTY_VERSION"; fi
 	git clone https://github.com/massbitprotocol/massbitroute_deploy_gbc.git -b $GBC_VERSION /root/.asdf/installs/gbc
+	git -C /root/.asdf/installs/gbc fetch --all --tags
 	git -C /root/.asdf/installs/gbc checkout $GBC_VERSION
 	ln -snf /root/.asdf/installs/gbc/$GBC_VERSION /usr/local/gbc
 	git clone https://github.com/massbitprotocol/massbitroute_deploy_openresty.git -b $OPENRESTY_VERSION /root/.asdf/installs/openresty
+	git -C /root/.asdf/installs/openresty fetch --all --tags
 	git -C /root/.asdf/installs/openresty checkout $OPENRESTY_VERSION
 	ln -snf /root/.asdf/installs/openresty/$OPENRESTY_VERSION /usr/local/openresty
 	mkdir -p /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site
