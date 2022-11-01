@@ -23,8 +23,6 @@ export GIT_PUBLIC_URL="https://github.com"
 
 _save_env() {
 
-
-
 	if [ -n "$MBR_ENV" ]; then
 		echo $MBR_ENV >$SITE_ROOT/vars/MBR_ENV
 	fi
@@ -65,24 +63,24 @@ _save_env() {
 		echo "DOMAIN missing"
 		exit 1
 	else
-	    echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
-	    if [ "$SESSION_ENABLE" == "true" ]; then
-				cat >$SITE_ROOT/src/env.lua <<EOF
+		echo $DOMAIN >$SITE_ROOT/vars/DOMAIN
+		if [ "$SESSION_ENABLE" == "true" ]; then
+			cat >$SITE_ROOT/src/env.lua <<EOF
 return {
 ["DOMAIN"] = "$DOMAIN",
 ["SESSION_ENABLE"] = "true"
 }
 EOF
-	    else
-		cat >$SITE_ROOT/src/env.lua <<EOF
+		else
+			cat >$SITE_ROOT/src/env.lua <<EOF
 return {
 ["DOMAIN"] = "$DOMAIN"
 }
 EOF
 		fi
-		
 
 	fi
+
 }
 _repo() {
 	if [ -z "$MBR_ENV" ]; then
@@ -749,6 +747,19 @@ _service_promtail() {
 	$PROMTOOL -config.file=$SITE_ROOT/promtool/config.yaml
 }
 
+_upgrade() {
+	if [ -z "$GBC_VERSION" ]; then echo "Missing GBC_VERSION"; fi
+	if [ -z "$OPENRESTY_VERSION" ]; then echo "Missing OPENRESTY_VERSION"; fi
+	git clone https://github.com/massbitprotocol/massbitroute_deploy_gbc.git -b $GBC_VERSION /root/.asdf/installs/gbc
+	ln -sf /root/.asdf/installs/gbc/$GBC_VERSION /usr/local/gbc
+	git clone https://github.com/massbitprotocol/massbitroute_deploy_openresty.git -b $OPENRESTY_VERSION /root/.asdf/installs/openresty
+	ln -sf /root/.asdf/installs/openresty/$OPENRESTY_VERSION /usr/local/openresty
+	mkdir -p /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site
+	cd /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site
+	ln -snf ../lualib .
+	rsync -avz /root/.asdf/installs/gbc/$GBC_VERSION/openresty/luajit/*/lua/5.1/* /root/.asdf/installs/openresty/$OPENRESTY_VERSION/lualib/
+	ln -sfn /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site /usr/local/site
+}
 _run() {
 	rm -rf $SITE_ROOT/tmp/*
 	_save_env
