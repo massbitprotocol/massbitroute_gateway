@@ -759,6 +759,9 @@ _upgrade() {
 	ln -snf ../lualib .
 	rsync -avz /root/.asdf/installs/gbc/$GBC_VERSION/openresty/luajit/*/lua/5.1/* /root/.asdf/installs/openresty/$OPENRESTY_VERSION/lualib/
 	ln -sfn /root/.asdf/installs/openresty/$OPENRESTY_VERSION/site /usr/local/site
+	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/lib  > /etc/ld.so.conf.d/0openresty.conf
+	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/luajit/lib  >> /etc/ld.so.conf.d/0openresty.conf
+	ldconfig
 }
 _run() {
 	rm -rf $SITE_ROOT/tmp/*
