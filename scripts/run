@@ -768,6 +768,12 @@ _upgrade() {
 	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/lib >/etc/ld.so.conf.d/0openresty.conf
 	echo /root/.asdf/installs/openresty/$OPENRESTY_VERSION/luajit/lib >>/etc/ld.so.conf.d/0openresty.conf
 	ldconfig
+	cd $SITE_ROOT
+	ln -sfn /usr/local/gbc .
+	$SITE_ROOT/cmd_server nginx -t
+	$SITE_ROOT/cmd_server nginx -V
+	$SITE_ROOT/cmd_server status
+	supervisorctl status
 }
 _run() {
 	rm -rf $SITE_ROOT/tmp/*
