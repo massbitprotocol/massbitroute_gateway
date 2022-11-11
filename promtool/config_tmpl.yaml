@@ -29,7 +29,7 @@ scrape_configs:
         method:
       source: request_body
   - match:
-      selector: '{__path__=~".+"} |~ `.*error.*code[^\d-]{2,5}-?\d+`'
+      selector: '{__path__=~".+"} |~ ".*error.*code[^\\d-]{2,5}-?\\d+"'      
       stages:
       - regex:
           expression: 'code[^\d-]{2,5}(?P<code>-?\d+)'
