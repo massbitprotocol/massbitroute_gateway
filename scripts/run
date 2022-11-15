@@ -226,6 +226,17 @@ _reload() {
 
 }
 
+_update_ssl() {
+	mkdir -p $SITE_ROOT/ssl
+	cd $SITE_ROOT/ssl
+	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
+	$curl $PORTAL_URL/deploy/_ssl/gateway_ssl.tar.gz -o gateway_ssl.tar.gz
+	echo $curl $PORTAL_URL/deploy/_ssl/gateway_ssl.tar.gz -o gateway_ssl.tar.gz
+	tar xvzf gateway_ssl.tar.gz
+	cd -
+}
+
+
 _prepare() {
 	echo "Prepare"
 
@@ -622,7 +633,7 @@ _load_config() {
 
 		# sed "s/proxy_pass http\:\/\/${blockchain}-${network}\.node\.mbr/proxy_pass http\:\/\/${blockchain}-${network}-${continent}-${country}\.node\.mbr/g" -i http.d/gateway.conf9
 	fi
-
+	_update_ssl
 	$SITE_ROOT/cmd_server nginx -t
 	$SITE_ROOT/cmd_server start all
 	return $is_loading
@@ -700,15 +711,6 @@ _update_docker() {
 	fi
 }
 
-_update_ssl() {
-	mkdir -p $SITE_ROOT/ssl
-	cd $SITE_ROOT/ssl
-	PORTAL_URL=$(cat $SITE_ROOT/vars/PORTAL_URL)
-	$curl $PORTAL_URL/deploy/_ssl/gateway_ssl.tar.gz -o gateway_ssl.tar.gz
-	echo $curl $PORTAL_URL/deploy/_ssl/gateway_ssl.tar.gz -o gateway_ssl.tar.gz
-	tar xvzf gateway_ssl.tar.gz
-	cd -
-}
 
 _update_tag() {
 	DOMAIN=$(cat $SITE_ROOT/vars/DOMAIN)
