@@ -21,25 +21,30 @@ scrape_configs:
       expressions:
         time: time_iso8601
         status:
-        request_time: 
+        response_time: request_time 
         request_body:
         response_body:
   - json:
       expressions:
         method:
+        json_rpc_id: id
       source: request_body
-  - match:
-      selector: '{__path__=~".+"} |~ ".*error.*code[^\\d-]{2,5}-?\\d+"'      
-      stages:
-      - regex:
-          expression: 'code[^\d-]{2,5}(?P<code>-?\d+)'
-          source: response_body
-  - labels:
-      status:
-      time:
-      method:
-      error_code: code
-      response_time: request_time
+  - json:
+      source: response_body
+      expressions:
+        error_code: error.code
+  - template:
+      source: error_code
+      template: '{{add .error_code 100000}}'
+  - pack:
+      labels:
+        - method
+        - status
+        - response_time
+        - time
+        - json_rpc_id
+        - error_code
   - timestamp:
       format: RFC3339
-      source: time      
+      source: time
+      
