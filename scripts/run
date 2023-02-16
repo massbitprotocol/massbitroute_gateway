@@ -648,6 +648,8 @@ _register_node() {
 	$MBR node register
 
 	supervisorctl status
+	supervisorctl update
+	supervisorctl start all
 
 	$SCRIPTS_RUN _load_config
 	$SITE_ROOT/cmd_server _update
