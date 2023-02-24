@@ -589,7 +589,7 @@ _load_config() {
 		is_loading=$_st1
 	fi
 
-	_optimize_upstream $blockchain $network $id $continent $country
+	# _optimize_upstream $blockchain $network $id $continent $country
 
 	# sed "s/__GATEWAY_ID__/$id/g" etc/gateway0.conf >http.d/gateway.conf0
 	# sed "s/__GATEWAY_USER_ID__/$user_id/g" -i http.d/gateway.conf0
