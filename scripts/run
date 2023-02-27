@@ -497,32 +497,32 @@ _update_network() {
 	fi
 	sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.new >$dapiconf
 	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i $dapiconf
-	_l0="${blockchain}-${network}\\."
+	#_l0="${blockchain}-${network}\\."
 
-	if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
-		_l="${blockchain}-${network}-${continent}-${country}\\."
-		grep $_l ${conf}-upstreams.conf >/dev/null
-		if [ $? -eq 0 ]; then
-			sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
-			sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $dapiconf
-		else
-			_l="${blockchain}-${network}-${continent}-${country}-v1-v2\\."
-			grep $_l ${conf}-upstreams.conf >/dev/null
-			if [ $? -eq 0 ]; then
-				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
-				sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $dapiconf
-			else
-				_l="${blockchain}-${network}-${continent}\\."
-				grep $_l ${conf}-upstreams.conf >/dev/null
-				if [ $? -eq 0 ]; then
-					sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
-					sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $dapiconf
-				fi
-			fi
+	# if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
+	# 	_l="${blockchain}-${network}-${continent}-${country}\\."
+	# 	grep $_l ${conf}-upstreams.conf >/dev/null
+	# 	if [ $? -eq 0 ]; then
+	# 		sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
+	# 		sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $dapiconf
+	# 	else
+	# 		_l="${blockchain}-${network}-${continent}-${country}-v1-v2\\."
+	# 		grep $_l ${conf}-upstreams.conf >/dev/null
+	# 		if [ $? -eq 0 ]; then
+	# 			sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
+	# 			sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $dapiconf
+	# 		else
+	# 			_l="${blockchain}-${network}-${continent}\\."
+	# 			grep $_l ${conf}-upstreams.conf >/dev/null
+	# 			if [ $? -eq 0 ]; then
+	# 				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $dapiconf
+	# 				sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $dapiconf
+	# 			fi
+	# 		fi
 
-		fi
+	# 	fi
 
-	fi
+	# fi
 
 	return $_reload
 }
