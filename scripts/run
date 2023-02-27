@@ -603,36 +603,36 @@ _load_config() {
 	# sed -i "s/__NETWORK__/$network/g" http.d/gateway.conf9
 	# sed -i "s/__DOMAIN__/$DOMAIN/g" http.d/gateway.conf9
 
-	blnet=${blockchain}-${network}
-	conf=http.d/gw-${blnet}
+	# blnet=${blockchain}-${network}
+	# conf=http.d/gw-${blnet}
 
-	_l0="${blockchain}-${network}\\."
-	_conf1=http.d/gateway.conf9
-	if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
-		_l="${blockchain}-${network}-${continent}-${country}\\."
-		grep $_l ${conf}-upstreams.conf >/dev/null
-		if [ $? -eq 0 ]; then
-			sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
-			sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $_conf1
-		else
-			_l="${blockchain}-${network}-${continent}-${country}-v1-v2\\."
-			grep $_l ${conf}-upstreams.conf >/dev/null
-			if [ $? -eq 0 ]; then
-				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
-				sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $_conf1
-			else
-				_l="${blockchain}-${network}-${continent}\\."
-				grep $_l ${conf}-upstreams.conf >/dev/null
-				if [ $? -eq 0 ]; then
-					sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
-					sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $_conf1
-				fi
-			fi
+	# _l0="${blockchain}-${network}\\."
+	# _conf1=http.d/gateway.conf9
+	# if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
+	# 	_l="${blockchain}-${network}-${continent}-${country}\\."
+	# 	grep $_l ${conf}-upstreams.conf >/dev/null
+	# 	if [ $? -eq 0 ]; then
+	# 		sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
+	# 		sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $_conf1
+	# 	else
+	# 		_l="${blockchain}-${network}-${continent}-${country}-v1-v2\\."
+	# 		grep $_l ${conf}-upstreams.conf >/dev/null
+	# 		if [ $? -eq 0 ]; then
+	# 			sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
+	# 			sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $_conf1
+	# 		else
+	# 			_l="${blockchain}-${network}-${continent}\\."
+	# 			grep $_l ${conf}-upstreams.conf >/dev/null
+	# 			if [ $? -eq 0 ]; then
+	# 				sed "s/proxy_pass http\:\/\/${_l0}node\.mbr/proxy_pass http\:\/\/${_l}node\.mbr/g" -i $_conf1
+	# 				sed "s/proxy_pass http\:\/\/ws-${_l0}node\.mbr/proxy_pass http\:\/\/ws-${_l}node\.mbr/g" -i $_conf1
+	# 			fi
+	# 		fi
 
-		fi
+	# 	fi
 
-		# sed "s/proxy_pass http\:\/\/${blockchain}-${network}\.node\.mbr/proxy_pass http\:\/\/${blockchain}-${network}-${continent}-${country}\.node\.mbr/g" -i http.d/gateway.conf9
-	fi
+	# 	# sed "s/proxy_pass http\:\/\/${blockchain}-${network}\.node\.mbr/proxy_pass http\:\/\/${blockchain}-${network}-${continent}-${country}\.node\.mbr/g" -i http.d/gateway.conf9
+	# fi
 	_update_ssl
 	$SITE_ROOT/cmd_server nginx -t
 	$SITE_ROOT/cmd_server start all
