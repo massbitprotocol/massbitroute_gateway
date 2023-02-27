@@ -465,6 +465,7 @@ _update_network() {
 	mv ${conf}-upstreams.conf.bk ${conf}-upstreams.conf
 
 	echo $curl $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new
+	$curl $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodesources.conf -o ${conf}-nodesources.conf >/dev/null
 	$curl $PORTAL_URL/deploy/${TYPE}conf/${blnet}-nodes.conf -o ${conf}-nodes.new >/dev/null
 	if [ $? -ne 0 ]; then
 		touch ${conf}-nodes.new
@@ -497,6 +498,8 @@ _update_network() {
 	fi
 	sed "s/__GATEWAY_ID__/$id/g" ${dapiconf}.new >$dapiconf
 	sed "s/__GATEWAY_USER_ID__/$user_id/g" -i $dapiconf
+
+	
 	#_l0="${blockchain}-${network}\\."
 
 	# if [ \( -n "$continent" \) -a \( -n "$country" \) ]; then
